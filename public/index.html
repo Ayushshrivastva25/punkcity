@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="screen-orientation" content="landscape">
 <title>PUNK CITY</title>
 <style>
   
@@ -57,22 +59,32 @@ canvas#c{display:block;position:fixed;top:0;left:0}
 .task-row.done .task-icon{background:#0ffcd4;border-color:#0ffcd4;color:#000}
 .task-reward{margin-left:auto;color:#ffcc00;font-size:7px;white-space:nowrap}
 
-/* ── MOBILE CONTROLS ── */
-#mobile-controls{display:none;position:fixed;bottom:0;left:0;right:0;height:230px;pointer-events:none;z-index:20;user-select:none;padding-bottom:env(safe-area-inset-bottom,0px)}
-.ctrl-stick{width:130px;height:130px;border-radius:50%;background:rgba(0,0,0,0.6);border:2px solid rgba(0,255,180,0.8);position:absolute;bottom:20px;left:16px;pointer-events:all;touch-action:none}
-.ctrl-knob{width:54px;height:54px;border-radius:50%;background:rgba(0,255,180,0.7);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
-#right-btns{position:absolute;bottom:18px;right:14px;display:flex;flex-direction:column;gap:14px;pointer-events:all}
-.act-btn{width:82px;height:82px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);background:rgba(0,0,0,0.65);color:#fff;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:all;flex-shrink:0}
-.act-btn.gas{border-color:#00ff88;color:#00ff88;background:rgba(0,50,20,0.8);font-size:14px}
-.act-btn.brk{border-color:#ff4433;color:#ff4433;background:rgba(50,0,0,0.8);font-size:13px}
-#left-actions{position:absolute;bottom:168px;left:14px;display:flex;gap:9px;pointer-events:all}
-#right-actions{position:absolute;bottom:192px;right:14px;display:flex;gap:9px;pointer-events:all}
-.act-btn.sm{width:62px;height:62px;font-size:10px;font-weight:700}
-.act-btn.pink{border-color:#ff44cc;color:#ff44cc;background:rgba(40,0,30,0.75)}
-.act-btn.cyan{border-color:#0ffcd4;color:#0ffcd4;background:rgba(0,30,30,0.75)}
-.act-btn.nos{border-color:#ff9900;color:#ff9900;background:rgba(30,15,0,0.75)}
-.act-btn.gold{border-color:#ffcc00;color:#ffcc00;background:rgba(30,20,0,0.75)}
-.act-btn.blue{border-color:#00d8ff;color:#00d8ff;background:rgba(0,20,40,0.75)}
+/* ── MOBILE CONTROLS — landscape d-pad layout ── */
+#mobile-controls{display:none;position:fixed;bottom:0;left:0;right:0;height:180px;pointer-events:none;z-index:20;user-select:none;padding-bottom:env(safe-area-inset-bottom,0px)}
+/* LEFT DPAD: turn arrows */
+#dpad-left{position:absolute;bottom:18px;left:12px;width:160px;height:160px;pointer-events:none}
+/* RIGHT DPAD: gas/brake/reverse */
+#dpad-right{position:absolute;bottom:18px;right:12px;width:160px;height:160px;pointer-events:none}
+/* Action buttons strip in centre-bottom */
+#action-strip{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:10px;pointer-events:all}
+.act-btn{width:70px;height:70px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);background:rgba(0,0,0,0.72);color:#fff;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:0;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:all;flex-shrink:0;-webkit-user-select:none;user-select:none}
+/* D-pad arrow buttons */
+.dpad-btn{width:58px;height:58px;border-radius:12px;border:2px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.7);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:all;position:absolute;-webkit-user-select:none;user-select:none;transition:background 0.05s}
+.dpad-btn:active{background:rgba(255,255,255,0.15)}
+/* Left dpad: ← → centered row */
+#btn-left{ left:0; top:50%;transform:translateY(-50%); border-color:rgba(0,255,180,0.6);color:#0ffcd4}
+#btn-right{right:0;top:50%;transform:translateY(-50%); border-color:rgba(0,255,180,0.6);color:#0ffcd4}
+/* Right dpad: ↑ gas top-center, ↓ reverse bottom-center, BRAKE middle-right */
+#btn-gas-d{ left:50%;top:0;     transform:translateX(-50%); border-color:#00ff88;color:#00ff88;background:rgba(0,50,20,0.8)}
+#btn-rev-d{ left:50%;bottom:0;  transform:translateX(-50%); border-color:#ffcc00;color:#ffcc00;background:rgba(30,20,0,0.8)}
+#btn-brk-d{ right:0; top:50%;  transform:translateY(-50%); border-color:#ff4433;color:#ff4433;background:rgba(50,0,0,0.8)}
+/* Action btn colours */
+.act-btn.pink{border-color:#ff44cc;color:#ff44cc;background:rgba(40,0,30,0.8)}
+.act-btn.cyan{border-color:#0ffcd4;color:#0ffcd4;background:rgba(0,30,30,0.8)}
+.act-btn.nos {border-color:#ff9900;color:#ff9900;background:rgba(30,15,0,0.8)}
+.act-btn.gold{border-color:#ffcc00;color:#ffcc00;background:rgba(30,20,0,0.8)}
+.act-btn.blue{border-color:#00d8ff;color:#00d8ff;background:rgba(0,20,40,0.8)}
+.act-btn.sm  {width:58px;height:58px;font-size:9px}
 
 /* ── MULTIPLAYER LOBBY ── */
 #mp-lobby{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
@@ -106,21 +118,49 @@ canvas#c{display:block;position:fixed;top:0;left:0}
 @media(max-width:900px),(pointer:coarse){
   #mobile-controls{display:block}
   #hints{display:none}
-  #task-toggle{font-size:7px;padding:6px 10px;top:12px}
-  #task-panel{top:42px;font-size:7px}
-  .panel{font-size:7px;padding:6px 10px}
-  .val{font-size:17px}
-  #p-kills{top:12px;left:12px}#p-score{top:76px;left:12px}
-  #p-health{top:12px;right:12px}#p-wanted{top:76px;right:12px}
-  #p-chase{top:140px;right:12px}#p-fine{top:204px;right:12px}
-  #p-time{top:140px;left:12px}
-  #p-speed{bottom:210px;right:12px}
-  #mm-wrap{width:110px;height:110px;bottom:210px;left:12px}
-  #mm{width:110px;height:110px}
+  /* Landscape: all panels tiny, compressed to corners */
+  #task-toggle{font-size:6px;padding:4px 8px;top:6px;letter-spacing:1px}
+  #task-panel{top:30px;font-size:6px}
+  .panel{font-size:6px;padding:4px 7px;letter-spacing:1px}
+  .val{font-size:13px}
+  /* Top-left column */
+  #p-kills{top:6px;left:6px}
+  #p-score{top:52px;left:6px}
+  #p-time{top:98px;left:6px}
+  /* Top-right column */
+  #p-health{top:6px;right:6px}
+  #p-wanted{top:52px;right:6px}
+  #p-chase{top:98px;right:6px}
+  #p-fine{top:144px;right:6px}
+  /* Bottom-right: speed above controls */
+  #p-speed{bottom:190px;right:6px;text-align:center}
+  #p-speed .val{font-size:22px}
+  /* Minimap bottom-left above controls */
+  #mm-wrap{width:100px;height:100px;bottom:190px;left:6px}
+  #mm{width:100px;height:100px}
+  /* Fuel between minimap and speed */
+  #p-fuel{bottom:190px;left:116px}
 }
 </style>
 </head>
 <body>
+<div id="rotate-msg" style="display:none;position:fixed;inset:0;z-index:9999;background:#000;color:#0ffcd4;font-family:Orbitron,monospace;font-size:16px;letter-spacing:3px;align-items:center;justify-content:center;text-align:center;flex-direction:column;gap:14px">
+  <div style="font-size:40px">↻</div>
+  <div>ROTATE YOUR PHONE</div>
+  <div style="font-size:9px;color:rgba(255,255,255,0.4)">PUNK CITY REQUIRES LANDSCAPE</div>
+</div>
+<script>
+(function(){
+  var rm=document.getElementById('rotate-msg');
+  function checkOri(){
+    var landscape=window.innerWidth>window.innerHeight;
+    rm.style.display=landscape?'none':'flex';
+  }
+  checkOri();
+  window.addEventListener('resize',checkOri);
+  window.addEventListener('orientationchange',function(){setTimeout(checkOri,200);});
+})();
+</script>
 <!-- MULTIPLAYER LOBBY -->
 <div id="mp-lobby">
   <h2>PUNK CITY</h2>
@@ -172,7 +212,7 @@ canvas#c{display:block;position:fixed;top:0;left:0}
   <div class="panel" id="p-objective">TARGET<span class="val" id="htarget">3000</span></div>
   <div class="panel" id="p-money">MONEY<span class="val" id="hmoney">0</span></div>
   <div id="mm-wrap"><canvas id="mm" width="154" height="154"></canvas></div>
-  <div id="hints">W/S — GAS/BRAKE &nbsp;|&nbsp; A/D — STEER &nbsp;|&nbsp; SPACE — HANDBRAKE &nbsp;|&nbsp; SHIFT — NITRO &nbsp;|&nbsp; E — CLUB &nbsp;|&nbsp; G — FUEL &nbsp;|&nbsp; R — GARAGE &nbsp;|&nbsp; B — BANK &nbsp;|&nbsp; V — WEAPON SHOP</div>
+  <div id="hints">W/S — GAS/REV &nbsp;|&nbsp; A/D — STEER &nbsp;|&nbsp; SPACE — BRAKE &nbsp;|&nbsp; SHIFT — NITRO &nbsp;|&nbsp; E — ENTER/EXIT &nbsp;|&nbsp; G — FUEL &nbsp;|&nbsp; R — GARAGE &nbsp;|&nbsp; B — BANK &nbsp;|&nbsp; V — WEAPONS &nbsp;|&nbsp; 0 — UNSTUCK</div>
   <button id="task-toggle" onclick="toggleTasks()">&#9776; MISSIONS</button>
   <div id="task-panel">
     <h3>MISSION LIST</h3>
@@ -216,22 +256,26 @@ canvas#c{display:block;position:fixed;top:0;left:0}
   <button class="btn btn-cyan" onclick="restartGame()">PLAY AGAIN</button>
 </div>
 <div id="mobile-controls">
-  <!-- LEFT: joystick + action buttons above it -->
-  <div class="ctrl-stick" id="stick-left"><div class="ctrl-knob" id="knob-left"></div></div>
-  <div id="left-actions">
-    <button class="act-btn sm pink" id="btn-e" title="Club/Bank/Enter">E</button>
-    <button class="act-btn sm cyan" id="btn-g" title="Gas Station">⛽</button>
+  <!-- LEFT D-PAD: steer left / right -->
+  <div id="dpad-left">
+    <div class="dpad-btn" id="btn-left">&#8592;</div>
+    <div class="dpad-btn" id="btn-right">&#8594;</div>
+  </div>
+  <!-- RIGHT D-PAD: gas / brake / reverse -->
+  <div id="dpad-right">
+    <div class="dpad-btn" id="btn-gas-d">&#8593;<br><span style="font-size:9px">GAS</span></div>
+    <div class="dpad-btn" id="btn-brk-d">BRK</div>
+    <div class="dpad-btn" id="btn-rev-d">&#8595;<br><span style="font-size:9px">REV</span></div>
+  </div>
+  <!-- CENTRE ACTION STRIP -->
+  <div id="action-strip">
+    <button class="act-btn sm pink" id="btn-e" title="Enter/Exit">E</button>
+    <button class="act-btn sm cyan" id="btn-g" title="Gas">⛽</button>
     <button class="act-btn sm blue" id="btn-r" title="Garage">🔧</button>
-  </div>
-  <!-- RIGHT: GAS/BRAKE + action buttons above -->
-  <div id="right-actions">
-    <button class="act-btn sm gold" id="btn-b" title="Rob Bank">💰</button>
-    <button class="act-btn sm" style="border-color:#ff44aa;color:#ff44aa;background:rgba(30,0,20,0.75)" id="btn-v" title="Weapon Shop">⚡</button>
+    <button class="act-btn sm gold" id="btn-b" title="Bank">💰</button>
+    <button class="act-btn sm" style="border-color:#ff44aa;color:#ff44aa;background:rgba(30,0,20,0.8)" id="btn-v" title="Weapons">⚡</button>
     <button class="act-btn sm nos" id="btn-boost" title="Nitro">NOS</button>
-  </div>
-  <div id="right-btns">
-    <button class="act-btn gas" id="btn-gas">GAS</button>
-    <button class="act-btn brk" id="btn-brake">BRK</button>
+    <button class="act-btn sm" style="border-color:#0ffcd4;color:#0ffcd4;background:rgba(0,20,20,0.8)" id="btn-rst" title="Unstuck">RST</button>
   </div>
 </div>
 <script>
@@ -239,14 +283,15 @@ canvas#c{display:block;position:fixed;top:0;left:0}
 (function(){
   var mc=document.getElementById('mobile-controls');
   function checkTouch(){
-    if('ontouchstart' in window||navigator.maxTouchPoints>0||window.innerWidth<=900){
+    if('ontouchstart' in window||navigator.maxTouchPoints>0||
+       window.innerWidth<=1024||/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)){
       mc.style.display='block';
     }
   }
   checkTouch();
   window.addEventListener('resize',checkTouch);
-  // Also show on first touch anywhere
-  document.addEventListener('touchstart',function(){mc.style.display='block';},{once:true,passive:true});
+  window.addEventListener('orientationchange',checkTouch);
+  document.addEventListener('touchstart',function(){mc.style.display='block';},{once:false,passive:true});
 })();
 </script>
 
@@ -350,13 +395,15 @@ function setDisplay(id,val){var el=byId(id); if(el) el.style.display=val;}
 // ═══════════════════════════════════════════════
 function initThree(){
   scene=new THREE.Scene();
-  camera=new THREE.PerspectiveCamera(62,W/H,0.1,600);
-  renderer=new THREE.WebGLRenderer({canvas:CV,antialias:false,powerPreference:'high-performance'});
-  renderer.setSize(W,H);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  var isMobile=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||('ontouchstart' in window);
+  camera=new THREE.PerspectiveCamera(62,W/H,0.5,800);
+  renderer=new THREE.WebGLRenderer({canvas:CV,antialias:false,powerPreference:'high-performance',precision:isMobile?'mediump':'highp'});
+  renderer.setSize(W,H);
+  renderer.setPixelRatio(isMobile?1:Math.min(window.devicePixelRatio,1.5));
+  renderer.shadowMap.enabled=!isMobile; // shadows off on mobile for visibility
+  if(!isMobile)renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   clock=new THREE.Clock();
-  // Fix canvas style on mobile
-  CV.style.width='100%';CV.style.height='100%';CV.style.position='fixed';CV.style.top='0';CV.style.left='0';
+  CV.style.width='100vw';CV.style.height='100vh';CV.style.position='fixed';CV.style.top='0';CV.style.left='0';CV.style.zIndex='1';
   window.addEventListener('resize',function(){
     W=window.innerWidth;H=window.innerHeight;
     camera.aspect=W/H;camera.updateProjectionMatrix();
@@ -483,6 +530,49 @@ function addGroundRing(x,z,r,col,label){
   fill.rotation.x=-Math.PI/2;fill.position.set(x,0.03,z);scene.add(fill);
 }
 
+// ─── ROAD DIRECTION SIGNS ─────────────────────
+function buildRoadSigns(){
+  // Place arrow + label panels on road surface near intersections pointing to each destination
+  var dests=[
+    {pos:bankPos,   label:'BANK',   col:0xffcc00, signs:[{x:bankPos.x+30,z:bankPos.z,    ang:Math.PI/2 },
+                                                          {x:bankPos.x,   z:bankPos.z+30, ang:0         }]},
+    {pos:garagePos, label:'GARAGE', col:0x00d8ff, signs:[{x:garagePos.x-30,z:garagePos.z, ang:-Math.PI/2},
+                                                          {x:garagePos.x,  z:garagePos.z-30,ang:Math.PI  }]},
+    {pos:weaponPos, label:'WEAPONS',col:0xff44aa, signs:[{x:weaponPos.x-30,z:weaponPos.z, ang:-Math.PI/2},
+                                                          {x:weaponPos.x,  z:weaponPos.z-30,ang:Math.PI  }]},
+    {pos:gasPos,    label:'GAS',    col:0x00ffcc, signs:[{x:gasPos.x-30,z:gasPos.z,       ang:-Math.PI/2},
+                                                          {x:gasPos.x,    z:gasPos.z-30,   ang:Math.PI   }]},
+    {pos:clubPos,   label:'CLUB',   col:0xff00cc, signs:[{x:clubPos.x-30,z:clubPos.z,     ang:-Math.PI/2},
+                                                          {x:clubPos.x,   z:clubPos.z-30,  ang:Math.PI   }]},
+  ];
+  dests.forEach(function(d){
+    d.signs.forEach(function(s){
+      placeRoadArrow(s.x,s.z,s.ang,d.col,d.label);
+    });
+  });
+}
+
+function placeRoadArrow(wx,wz,ang,col,label){
+  var g=new THREE.Group();
+  g.position.set(wx,0.06,wz);
+  g.rotation.y=ang;
+  // Arrow body
+  var arM=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.85});
+  // Shaft
+  var shaft=new THREE.Mesh(new THREE.PlaneGeometry(1.2,4),arM);
+  shaft.rotation.x=-Math.PI/2;shaft.position.z=0.5;g.add(shaft);
+  // Triangle head
+  var headGeo=new THREE.BufferGeometry();
+  var verts=new Float32Array([0,0,0, -1.4,0,0, 0,0,-2.5, 1.4,0,0, 0,0,-2.5, 0,0,0]);
+  headGeo.setAttribute('position',new THREE.BufferAttribute(verts,3));
+  var head=new THREE.Mesh(headGeo,arM);head.position.z=-1.8;g.add(head);
+  // Colour border strip (outline effect)
+  var outline=new THREE.Mesh(new THREE.PlaneGeometry(1.5,4.5),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.25}));
+  outline.rotation.x=-Math.PI/2;outline.position.set(0,-0.01,0.5);g.add(outline);
+  scene.add(g);
+}
+
+
 // ═══════════════════════════════════════════════
 // BUILD WORLD
 // ═══════════════════════════════════════════════
@@ -514,11 +604,11 @@ function buildBillboard(wx,wz,facing,col,keyLabel,topLine,botLine){
 
 function buildWorld(){
   buildSky();
-  scene.fog=new THREE.FogExp2(0x88aacc,0.003); // fog also changes with day/night via color
+  scene.fog=new THREE.FogExp2(0x88aacc,0.0012); // lighter fog for mobile // fog also changes with day/night via color
 
   // Lights — stored for day/night control
-  ambLight=new THREE.AmbientLight(0x8899bb,2.6);scene.add(ambLight);
-  sunLight=new THREE.DirectionalLight(0xaabbdd,1.7);
+  ambLight=new THREE.AmbientLight(0xffffff,3.5);scene.add(ambLight); // boosted for mobile
+  sunLight=new THREE.DirectionalLight(0xffffff,2.2);
   sunLight.position.set(120,250,80);sunLight.castShadow=true;
   sunLight.shadow.mapSize.width=sunLight.shadow.mapSize.height=1024;
   sunLight.shadow.camera.left=sunLight.shadow.camera.bottom=-500;
@@ -526,7 +616,7 @@ function buildWorld(){
   sunLight.shadow.camera.far=700;scene.add(sunLight);
 
   // Ground
-  var gnd=new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),new THREE.MeshLambertMaterial({map:makeAsphalt()}));
+  var gnd=new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),new THREE.MeshBasicMaterial({map:makeAsphalt()}));
   gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=true;scene.add(gnd);
 
   // Road markings
@@ -568,6 +658,9 @@ function buildWorld(){
   buildBillboard(weaponPos.x-30, weaponPos.z,    -Math.PI/2, 0xff44aa, 'V', 'WEAPONS',   'UPGRADES');
   buildBillboard(gasPos.x,       gasPos.z+30,    Math.PI,    0x00ffcc, 'G', 'GAS STN',   'REFUEL +50HP');
   buildBillboard(clubPos.x+30,   clubPos.z+14,   Math.PI/2,  0xff00cc, 'E', 'CLUB NEON', 'ENTER FREE');
+
+  // ── ROAD DIRECTION SIGNS (painted arrows pointing to destinations) ──
+  buildRoadSigns();
 
   // Streetlights
   for(var i=-5;i<=5;i++){
@@ -633,6 +726,19 @@ function buildClub(bx,bz,swTex){
   // Dance floor
   var df=new THREE.Mesh(new THREE.BoxGeometry(22,0.15,22),new THREE.MeshLambertMaterial({color:0x220033}));
   df.position.set(bx,0.3,bz);df.userData.clubOnly=true;df.visible=false;scene.add(df);
+  // Interior walls (4 sides + ceiling so player feels inside)
+  var wallM=new THREE.MeshLambertMaterial({color:0x1a0030,side:THREE.FrontSide});
+  var walls3d=[
+    {g:new THREE.BoxGeometry(24,12,0.4), p:[bx,6,bz-11]},   // back wall
+    {g:new THREE.BoxGeometry(24,12,0.4), p:[bx,6,bz+11]},   // front wall (interior side)
+    {g:new THREE.BoxGeometry(0.4,12,22), p:[bx-11,6,bz]},   // left
+    {g:new THREE.BoxGeometry(0.4,12,22), p:[bx+11,6,bz]},   // right
+    {g:new THREE.BoxGeometry(24,0.4,22), p:[bx,12,bz]},     // ceiling
+  ];
+  walls3d.forEach(function(w){
+    var m=new THREE.Mesh(w.g,wallM);m.position.set(w.p[0],w.p[1],w.p[2]);
+    m.userData.clubOnly=true;m.visible=false;scene.add(m);
+  });
 
   // Interior pulse lights
   var iCols=[0xff0066,0x8800ff,0x00ccff,0xff6600];
@@ -738,6 +844,17 @@ function buildBank(bx,bz,swTex){
   var sign=new THREE.Mesh(new THREE.BoxGeometry(14,2.3,0.4),new THREE.MeshBasicMaterial({color:0xffcc00}));
   sign.position.set(bx,17,bz+14.2);scene.add(sign);
   var pl=new THREE.PointLight(0xffcc00,2.5,30);pl.position.set(bx,14,bz+10);scene.add(pl);
+  // Interior room — hidden until entered
+  var bWallM=new THREE.MeshBasicMaterial({color:0x2a2a3a,side:THREE.BackSide});
+  var bRoom=new THREE.Mesh(new THREE.BoxGeometry(26,14,26),bWallM);
+  bRoom.position.set(bx,7,bz);bRoom.userData.bankOnly=true;bRoom.visible=false;scene.add(bRoom);
+  // Floor
+  var bFloor=new THREE.Mesh(new THREE.PlaneGeometry(24,24),new THREE.MeshBasicMaterial({color:0x334433}));
+  bFloor.rotation.x=-Math.PI/2;bFloor.position.set(bx,0.1,bz);bFloor.userData.bankOnly=true;bFloor.visible=false;scene.add(bFloor);
+  // Counter desk
+  var bDesk=new THREE.Mesh(new THREE.BoxGeometry(12,1.2,2),new THREE.MeshBasicMaterial({color:0x554422}));
+  bDesk.position.set(bx,0.9,bz-6);bDesk.userData.bankOnly=true;bDesk.visible=false;scene.add(bDesk);
+  var bLight=new THREE.PointLight(0xffee88,3,25);bLight.position.set(bx,8,bz);bLight.userData.bankOnly=true;scene.add(bLight);
   BLOCKS.push({cx:bx,cz:bz,hw:15,type:'bank'});
 }
 
@@ -750,6 +867,17 @@ function buildWeaponShop(bx,bz,swTex){
   var neon=new THREE.Mesh(new THREE.BoxGeometry(12,2,0.35),new THREE.MeshBasicMaterial({color:0xff44aa}));
   neon.position.set(bx,13.2,bz+11);scene.add(neon);
   var pl=new THREE.PointLight(0xff44aa,2.8,26);pl.position.set(bx,9.5,bz+8);scene.add(pl);
+  // Interior room
+  var wWallM=new THREE.MeshBasicMaterial({color:0x330022,side:THREE.BackSide});
+  var wRoom=new THREE.Mesh(new THREE.BoxGeometry(22,10,20),wWallM);
+  wRoom.position.set(bx,5,bz);wRoom.userData.weaponOnly=true;wRoom.visible=false;scene.add(wRoom);
+  var wFloor=new THREE.Mesh(new THREE.PlaneGeometry(20,18),new THREE.MeshBasicMaterial({color:0x221122}));
+  wFloor.rotation.x=-Math.PI/2;wFloor.position.set(bx,0.1,bz);wFloor.userData.weaponOnly=true;wFloor.visible=false;scene.add(wFloor);
+  // Weapon racks on walls
+  var rackM=new THREE.MeshBasicMaterial({color:0x443322});
+  var rack=new THREE.Mesh(new THREE.BoxGeometry(8,3,0.5),rackM);
+  rack.position.set(bx,4,bz-8);rack.userData.weaponOnly=true;rack.visible=false;scene.add(rack);
+  var wLight=new THREE.PointLight(0xff44aa,3,22);wLight.position.set(bx,7,bz);wLight.userData.weaponOnly=true;scene.add(wLight);
   BLOCKS.push({cx:bx,cz:bz,hw:12,type:'weapon'});
 }
 
@@ -1196,11 +1324,8 @@ function updateCar(dt){
 
   var leftHeld  = controlHeld('a','arrowleft');
   var rightHeld = controlHeld('d','arrowright');
-  // Joystick steer override (steer only — no gas/brake from joystick)
-  if(joy.active && Math.abs(joy.x) > 0.15){
-    var jSteer = joy.x * STEER_MAX;
-    car.steer += (jSteer - car.steer) * (1 - Math.exp(-dt / STEER_TAU));
-  } else if(leftHeld){
+  // D-pad steering (joystick removed)
+  if(leftHeld){
     car.steer += (STEER_MAX - car.steer) * (1 - Math.exp(-dt / STEER_TAU));
   } else if(rightHeld){
     car.steer += (-STEER_MAX - car.steer) * (1 - Math.exp(-dt / STEER_TAU));
@@ -1622,6 +1747,8 @@ function enterBank(){
   bankPunchTimer=0;
   triggerDrama('BANK HEIST','KNOCK OUT THE GUARD!','','#ffcc00');
   playTone(220,0.12,'sawtooth',0.06);
+  // Show bank interior room
+  scene.traverse(function(o){if(o.userData.bankOnly){o.visible=true;}});
   // Camera pan to interior
   camTarget.set(bankPos.x,5,bankPos.z-8);
   camLook.set(bankPos.x,1,bankPos.z);
@@ -1630,21 +1757,25 @@ function enterBank(){
 function updateBank(dt){
   if(!inBank||!playerOnFoot)return;
   // Player on-foot movement (reuse club walking)
-  var mx=0,mz=0;
-  if(controlHeld('w','arrowup'))mz-=1;
-  if(controlHeld('s','arrowdown'))mz+=1;
-  if(controlHeld('a','arrowleft'))mx-=1;
-  if(controlHeld('d','arrowright'))mx+=1;
-  if(joy.active){mx=joy.x;mz=joy.y;}
-  var len=Math.sqrt(mx*mx+mz*mz);
-  if(len>0.02){
-    if(len>1){mx/=len;mz/=len;}
-    playerFace=Math.atan2(mx,mz);
-    playerOnFoot.position.x=Math.max(bankPos.x-12,Math.min(bankPos.x+12,playerOnFoot.position.x+mx*footBaseSpeed*dt));
-    playerOnFoot.position.z=Math.max(bankPos.z-14,Math.min(bankPos.z+14,playerOnFoot.position.z+mz*footBaseSpeed*dt));
-    playerOnFoot.rotation.y=playerFace;
+  // Third-person on-foot: A/D rotate, W/S move
+  var turning=0,moving=0;
+  if(controlHeld('a','arrowleft'))turning=-1;
+  if(controlHeld('d','arrowright'))turning=1;
+  if(controlHeld('w','arrowup'))moving=-1;
+  if(controlHeld('s','arrowdown'))moving=1;
+  playerFace+=turning*3.5*dt;
+  if(Math.abs(moving)>0.01){
+    var nbx=playerOnFoot.position.x+Math.sin(playerFace)*moving*footBaseSpeed*dt;
+    var nbz=playerOnFoot.position.z+Math.cos(playerFace)*moving*footBaseSpeed*dt;
+    playerOnFoot.position.x=Math.max(bankPos.x-11,Math.min(bankPos.x+11,nbx));
+    playerOnFoot.position.z=Math.max(bankPos.z-11,Math.min(bankPos.z+11,nbz));
   }
-  camera.position.set(playerOnFoot.position.x-Math.sin(playerFace)*6,playerOnFoot.position.y+4,playerOnFoot.position.z-Math.cos(playerFace)*6);
+  playerOnFoot.rotation.y=playerFace;
+  // Third-person camera
+  camera.position.set(
+    playerOnFoot.position.x-Math.sin(playerFace)*5.5,
+    playerOnFoot.position.y+3.5,
+    playerOnFoot.position.z-Math.cos(playerFace)*5.5);
   camera.lookAt(playerOnFoot.position.x,playerOnFoot.position.y+1,playerOnFoot.position.z);
 
   // Phase 1: reach guard and punch (press B)
@@ -1693,14 +1824,12 @@ function updateBank(dt){
     }
   }
 
-  // Phase 3: return to car (press B near entrance)
+  // Phase 3: walk back to car — B or E exits
   if(bankPhase===3){
+    showNotify('Walk to the entrance & press B or E to escape!',0,'#ff4433');
     var edx=playerOnFoot.position.x-bankPos.x;
-    var edz=playerOnFoot.position.z-(bankPos.z+14);
-    if(edx*edx+edz*edz<25){
-      showNotify('Press B to get back in the car!',0,'#ff4433');
-      if(keys['b']){exitBank();}
-    }
+    var edz=playerOnFoot.position.z-(bankPos.z+12);
+    if(edx*edx+edz*edz<36||keys['b']||keys['e']){exitBank();}
   }
 }
 
@@ -1710,6 +1839,7 @@ function exitBank(){
   if(bankGuard){scene.remove(bankGuard);bankGuard=null;}
   if(bankCash){scene.remove(bankCash);bankCash=null;}
   if(playerOnFoot){scene.remove(playerOnFoot);playerOnFoot=null;}
+  scene.traverse(function(o){if(o.userData.bankOnly){o.visible=false;}});
   setDisplay('notify','none');
   showNotify('Back in the car — DRIVE!',1800,'#ff4433');
 }
@@ -1730,27 +1860,30 @@ function enterWeaponShop(){
   scene.add(weaponDealer);
   triggerDrama('WEAPON SHOP','WALK TO THE DEALER','','#ff44aa');
   playTone(330,0.08,'sawtooth',0.04);setTimeout(function(){playTone(440,0.1,'sawtooth',0.04);},120);
+  scene.traverse(function(o){if(o.userData.weaponOnly){o.visible=true;}});
   camTarget.set(weaponPos.x,5,weaponPos.z-10);
   camLook.set(weaponPos.x,1,weaponPos.z);
 }
 
 function updateWeaponShop(dt){
   if(!inWeaponShop||!playerOnFoot)return;
-  var mx=0,mz=0;
-  if(controlHeld('w','arrowup'))mz-=1;
-  if(controlHeld('s','arrowdown'))mz+=1;
-  if(controlHeld('a','arrowleft'))mx-=1;
-  if(controlHeld('d','arrowright'))mx+=1;
-  if(joy.active){mx=joy.x;mz=joy.y;}
-  var len=Math.sqrt(mx*mx+mz*mz);
-  if(len>0.02){
-    if(len>1){mx/=len;mz/=len;}
-    playerFace=Math.atan2(mx,mz);
-    playerOnFoot.position.x=Math.max(weaponPos.x-10,Math.min(weaponPos.x+10,playerOnFoot.position.x+mx*footBaseSpeed*dt));
-    playerOnFoot.position.z=Math.max(weaponPos.z-12,Math.min(weaponPos.z+12,playerOnFoot.position.z+mz*footBaseSpeed*dt));
-    playerOnFoot.rotation.y=playerFace;
+  var turning=0,moving=0;
+  if(controlHeld('a','arrowleft'))turning=-1;
+  if(controlHeld('d','arrowright'))turning=1;
+  if(controlHeld('w','arrowup'))moving=-1;
+  if(controlHeld('s','arrowdown'))moving=1;
+  playerFace+=turning*3.5*dt;
+  if(Math.abs(moving)>0.01){
+    var nwx=playerOnFoot.position.x+Math.sin(playerFace)*moving*footBaseSpeed*dt;
+    var nwz=playerOnFoot.position.z+Math.cos(playerFace)*moving*footBaseSpeed*dt;
+    playerOnFoot.position.x=Math.max(weaponPos.x-9,Math.min(weaponPos.x+9,nwx));
+    playerOnFoot.position.z=Math.max(weaponPos.z-9,Math.min(weaponPos.z+9,nwz));
   }
-  camera.position.set(playerOnFoot.position.x-Math.sin(playerFace)*6,playerOnFoot.position.y+4,playerOnFoot.position.z-Math.cos(playerFace)*6);
+  playerOnFoot.rotation.y=playerFace;
+  camera.position.set(
+    playerOnFoot.position.x-Math.sin(playerFace)*5.5,
+    playerOnFoot.position.y+3.5,
+    playerOnFoot.position.z-Math.cos(playerFace)*5.5);
   camera.lookAt(playerOnFoot.position.x,playerOnFoot.position.y+1,playerOnFoot.position.z);
 
   // Reach dealer
@@ -1792,8 +1925,8 @@ function updateWeaponShop(dt){
           }
         }
       } else {
-        showNotify('MAX UPGRADES! Press V to leave',0,'#ff44aa');
-        if(keys['v'])exitWeaponShop();
+        showNotify('MAX UPGRADES! Press V or E to leave',0,'#ff44aa');
+        if(keys['v']||keys['e'])exitWeaponShop();
       }
     }
   }
@@ -1811,6 +1944,7 @@ function exitWeaponShop(){
   if(weaponDealer){scene.remove(weaponDealer);weaponDealer=null;}
   if(playerOnFoot){scene.remove(playerOnFoot);playerOnFoot=null;}
   car.mesh.visible=true;
+  scene.traverse(function(o){if(o.userData.weaponOnly){o.visible=false;}});
   setDisplay('notify','none');
   showNotify('Left Weapon Shop',1500,'#ff44aa');
 }
@@ -1830,33 +1964,34 @@ function updateClub(dt){
     }
   }
   if(onFoot&&playerOnFoot){
-    var mx=0,mz=0;
-    if(controlHeld('w','arrowup'))mz-=1;
-    if(controlHeld('s','arrowdown'))mz+=1;
-    if(controlHeld('a','arrowleft'))mx-=1;
-    if(controlHeld('d','arrowright'))mx+=1;
-    if(joy.active){mx=joy.x;mz=joy.y;}
-    var len=Math.sqrt(mx*mx+mz*mz);
-    var sp=footBaseSpeed*(controlHeld('shift')?1.45:1.0);
-    if(len>0.02){
-      if(len>1){mx/=len;mz/=len;}
-      playerFace=Math.atan2(mx,mz);
-      playerOnFoot.position.x+=mx*sp*dt;
-      playerOnFoot.position.z+=mz*sp*dt;
-      playerOnFoot.rotation.y=playerFace;
-      if(playerOnFoot.userData.lLeg){
-        var sw=Math.sin(clubTime*8)*0.5;
-        playerOnFoot.userData.lLeg.rotation.x=sw;
-        playerOnFoot.userData.rLeg.rotation.x=-sw;
-        playerOnFoot.userData.lArm.rotation.x=-sw*0.75;
-        playerOnFoot.userData.rArm.rotation.x=sw*0.75;
-      }
+    // Third-person: A/D rotate player, W/S move forward/back
+    var turning=0,moving=0;
+    if(controlHeld('a','arrowleft'))turning=-1;
+    if(controlHeld('d','arrowright'))turning=1;
+    if(controlHeld('w','arrowup'))moving=-1;
+    if(controlHeld('s','arrowdown'))moving=1;
+    playerFace+=turning*3.5*dt;
+    var sp=footBaseSpeed;
+    if(Math.abs(moving)>0.01){
+      var nx=playerOnFoot.position.x+Math.sin(playerFace)*moving*sp*dt;
+      var nz=playerOnFoot.position.z+Math.cos(playerFace)*moving*sp*dt;
+      var lim=11.5;
+      playerOnFoot.position.x=Math.max(clubPos.x-lim,Math.min(clubPos.x+lim,nx));
+      playerOnFoot.position.z=Math.max(clubPos.z-lim,Math.min(clubPos.z+lim,nz));
     }
-    var lim=12.2;
-    playerOnFoot.position.x=Math.max(clubPos.x-lim,Math.min(clubPos.x+lim,playerOnFoot.position.x));
-    playerOnFoot.position.z=Math.max(clubPos.z-lim,Math.min(clubPos.z+lim,playerOnFoot.position.z));
-    camera.position.set(playerOnFoot.position.x-Math.sin(playerFace)*5.5,playerOnFoot.position.y+3.3,playerOnFoot.position.z-Math.cos(playerFace)*5.5);
-    camera.lookAt(playerOnFoot.position.x,playerOnFoot.position.y+1.2,playerOnFoot.position.z);
+    playerOnFoot.rotation.y=playerFace;
+    // Walk animation
+    if(Math.abs(moving)>0.01&&playerOnFoot.userData.lLeg){
+      var sw=Math.sin(clubTime*8)*0.5;
+      playerOnFoot.userData.lLeg.rotation.x=sw;playerOnFoot.userData.rLeg.rotation.x=-sw;
+      playerOnFoot.userData.lArm.rotation.x=-sw*0.75;playerOnFoot.userData.rArm.rotation.x=sw*0.75;
+    }
+    // Camera follows behind player (third person)
+    var camDist=5.5,camH=3.5;
+    var camX=playerOnFoot.position.x-Math.sin(playerFace)*camDist;
+    var camZ=playerOnFoot.position.z-Math.cos(playerFace)*camDist;
+    camera.position.set(camX,playerOnFoot.position.y+camH,camZ);
+    camera.lookAt(playerOnFoot.position.x,playerOnFoot.position.y+1.0,playerOnFoot.position.z);
     clubStayTimer+=dt;
   } else {
     camera.position.set(clubPos.x+Math.sin(clubTime*0.2)*4,5,clubPos.z+Math.cos(clubTime*0.2)*4);
@@ -1982,14 +2117,6 @@ function controlHeld(){
   for(var i=0;i<arguments.length;i++){
     var k=String(arguments[i]).toLowerCase();
     if(keys[k])return true;
-  }
-  // Joystick X-axis ONLY for steering (left/right)
-  // Gas/brake are separate buttons, not joystick
-  var left=joy.x<-0.2, right=joy.x>0.2;
-  for(var j=0;j<arguments.length;j++){
-    var kk=String(arguments[j]).toLowerCase();
-    if((kk==='a'||kk==='arrowleft')&&left)return true;
-    if((kk==='d'||kk==='arrowright')&&right)return true;
   }
   return false;
 }
@@ -2278,69 +2405,42 @@ function triggerWin(msg){
 }
 
 function handleInteractE(){
+  // E is universal exit from any interior
   if(inClub){exitClub();return;}
+  if(inBank&&bankPhase===3){exitBank();return;}
+  if(inBank){showNotify('Complete the heist first!',1200,'#ff4433');return;}
+  if(inWeaponShop){exitWeaponShop();return;}
+  // Enter club
   var cDx=car.x-clubPos.x,cDz=car.z-clubPos.z;
   if(Math.sqrt(cDx*cDx+cDz*cDz)<22){enterClub();}
-  else{showNotify('Drive closer to Club Neon (magenta dot on map)',2000,'#ff88ff');}
+  else{showNotify('Drive closer to Club Neon',2000,'#ff88ff');}
 }
 
 function setupMobileControls(){
-  var stick=byId('stick-left');
-  var knob=byId('knob-left');
-  var baseR=50;
-  function setKnob(dx,dy){
-    var len=Math.sqrt(dx*dx+dy*dy);
-    if(len>baseR){dx=dx/len*baseR;dy=dy/len*baseR;}
-    knob.style.transform='translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px))';
+  // Helper: bind hold button to a key
+  function bindKey(id,key){
+    var el=byId(id);if(!el)return;
+    el.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();keys[key]=true;el.style.background='rgba(255,255,255,0.18)';});
+    el.addEventListener('pointerup',  function(){keys[key]=false;el.style.background='';});
+    el.addEventListener('pointercancel',function(){keys[key]=false;el.style.background='';});
+    el.addEventListener('contextmenu',function(e){e.preventDefault();});
   }
-  function resetKnob(){joy.active=false;joy.x=0;joy.y=0;joy.pointerId=null;knob.style.transform='translate(-50%,-50%)';}
-  stick.addEventListener('pointerdown',function(e){
-    e.preventDefault();stick.setPointerCapture(e.pointerId);
-    joy.active=true;joy.pointerId=e.pointerId;
-    var r=stick.getBoundingClientRect();
-    var dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
-    joy.x=Math.max(-1,Math.min(1,dx/baseR));
-    joy.y=Math.max(-1,Math.min(1,dy/baseR));
-    setKnob(dx,dy);
-  });
-  stick.addEventListener('pointermove',function(e){
-    if(!joy.active||joy.pointerId!==e.pointerId)return;
-    var r=stick.getBoundingClientRect();
-    var dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
-    joy.x=Math.max(-1,Math.min(1,dx/baseR));
-    joy.y=Math.max(-1,Math.min(1,dy/baseR));
-    setKnob(dx,dy);
-  });
-  function up(e){if(joy.pointerId===e.pointerId)resetKnob();}
-  stick.addEventListener('pointerup',up);
-  stick.addEventListener('pointercancel',up);
-  stick.addEventListener('lostpointercapture',function(){resetKnob();});
-
-  // GAS button — held
-  var btnGas=byId('btn-gas');
-  btnGas.addEventListener('pointerdown',function(e){e.preventDefault();keys['w']=true;});
-  btnGas.addEventListener('pointerup',function(){keys['w']=false;});
-  btnGas.addEventListener('pointercancel',function(){keys['w']=false;});
-
-  // BRAKE button — held
-  var btnBrake=byId('btn-brake');
-  btnBrake.addEventListener('pointerdown',function(e){e.preventDefault();keys[' ']=true;keys['s']=true;});
-  btnBrake.addEventListener('pointerup',function(){keys[' ']=false;keys['s']=false;});
-  btnBrake.addEventListener('pointercancel',function(){keys[' ']=false;keys['s']=false;});
-
-  // Extra action buttons
+  // LEFT D-PAD: steer
+  bindKey('btn-left','a');
+  bindKey('btn-right','d');
+  // RIGHT D-PAD: throttle / brake / reverse
+  bindKey('btn-gas-d','w');
+  bindKey('btn-brk-d',' ');   // handbrake/brake
+  bindKey('btn-rev-d','s');   // reverse
+  // Action strip
   byId('btn-e').addEventListener('pointerdown',function(e){e.preventDefault();handleInteractE();});
-  var btnG=byId('btn-g');
-  btnG.addEventListener('pointerdown',function(e){e.preventDefault();keys['g']=true;});
-  btnG.addEventListener('pointerup',function(){keys['g']=false;});
-  btnG.addEventListener('pointercancel',function(){keys['g']=false;});
-  var btnR=byId('btn-r');
-  if(btnR){btnR.addEventListener('pointerdown',function(e){e.preventDefault();keys['r']=true;});btnR.addEventListener('pointerup',function(){keys['r']=false;});btnR.addEventListener('pointercancel',function(){keys['r']=false;});}
-  var btnB=byId('btn-b');
-  if(btnB){btnB.addEventListener('pointerdown',function(e){e.preventDefault();keys['b']=true;});btnB.addEventListener('pointerup',function(){keys['b']=false;});btnB.addEventListener('pointercancel',function(){keys['b']=false;});}
-  var btnV=byId('btn-v');
-  if(btnV){btnV.addEventListener('pointerdown',function(e){e.preventDefault();keys['v']=true;});btnV.addEventListener('pointerup',function(){keys['v']=false;});btnV.addEventListener('pointercancel',function(){keys['v']=false;});}
+  bindKey('btn-g','g');
+  bindKey('btn-r','r');
+  bindKey('btn-b','b');
+  bindKey('btn-v','v');
   byId('btn-boost').addEventListener('pointerdown',function(e){e.preventDefault();boostRequest=true;});
+  var btnRst=byId('btn-rst');
+  if(btnRst)btnRst.addEventListener('pointerdown',function(e){e.preventDefault();resetCarPosition();});
 }
 
 
@@ -2391,6 +2491,7 @@ window.addEventListener('keydown',function(e){
   if(e.key.toLowerCase()==='b'){keys['b']=true;}
   if(e.key.toLowerCase()==='v'){keys['v']=true;}
   if(e.key.toLowerCase()==='shift'){keys['shift']=true;}
+  if(e.key.toLowerCase()==='0'){resetCarPosition();}  // 0 = reset position
 });
 window.addEventListener('keyup',function(e){
   keys[e.key.toLowerCase()]=false;
@@ -2422,9 +2523,11 @@ function resetGame(){
   if(inClub){scene.traverse(function(o){if(o.userData.clubOnly)o.visible=false;});inClub=false;setDisplay('club-ui','none');}
   if(playerOnFoot){scene.remove(playerOnFoot);playerOnFoot=null;}
   onFoot=false;winActive=false;chaseEscaped=false;gasRefillUsed=false;clubStayTimer=0;chaseEverStarted=false;
-  if(car.mesh)scene.remove(car.mesh);
-  car.mesh=buildCarBase(0xcc1111,false);car.x=4;car.z=4;car.angle=0;car.speed=0;car.steer=0;car.health=100;car.fuel=100;
-  car.mesh.position.set(4,0,4);scene.add(car.mesh);
+  if(car.mesh&&scene)scene.remove(car.mesh);
+  car.mesh=buildCarBase(CAR_MODELS[selectedCarModel].color,false);
+  car.x=4;car.z=4;car.angle=0;car.speed=0;car.steer=0;car.health=100;car.fuel=100;
+  car.mesh.position.set(4,0,4);
+  if(scene)scene.add(car.mesh);
   kills=0;score=0;killsSince=0;wantedStars=0;money=0;
   chaseActive=false;chaseTimer=0;fineActive=false;nearGas=false;gasRefillCD=0;
   cycleTime=0;isDay=true;
@@ -2441,13 +2544,29 @@ function resetGame(){
   spawnPeds();
   clock.getDelta();running=true;
 }
+function resetCarPosition(){
+  // Unstuck: teleport car to nearest road position
+  if(!running||inClub||inBank||inWeaponShop)return;
+  // Snap to nearest grid intersection (multiples of 30)
+  var gx=Math.round(car.x/30)*30;
+  var gz=Math.round(car.z/30)*30;
+  car.x=gx;car.z=gz;car.speed=0;car.angle=0;
+  if(car.mesh){car.mesh.position.set(car.x,0,car.z);car.mesh.rotation.y=0;}
+  showNotify('Position Reset!',1500,'#0ffcd4');
+  playTone(440,0.08,'sine',0.04);
+}
+
 function triggerGameOver(){
   running=false;
   updateEngineSound();
   setText('goscore',score);setText('gokills',kills);
   setDisplay('gameover','flex');
 }
-function restartGame(){setDisplay('gameover','none');setDisplay('winscreen','none');resetGame();}
+function restartGame(){
+  setDisplay('gameover','none');setDisplay('winscreen','none');
+  if(!worldBuilt){return;} // world not built yet — do nothing
+  resetGame();
+}
 setupMobileControls();
 byId('startBtn').addEventListener('click',startGame);
 
