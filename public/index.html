@@ -27,6 +27,8 @@ canvas#c{display:block;position:fixed;top:0;left:0}
 #p-speed{bottom:22px;right:22px;text-align:center}
 #p-speed .val{font-size:38px;font-weight:900}
 #p-speed span{font-size:8px;color:#0ffcd4}
+#p-objective{top:18px;left:50%;transform:translateX(-50%);text-align:center}
+#p-money{top:90px;left:50%;transform:translateX(-50%);text-align:center}
 #mm-wrap{position:absolute;bottom:22px;left:22px;width:154px;height:154px;border:1px solid rgba(0,255,180,0.35);background:rgba(0,0,0,0.7)}
 #mm{width:154px;height:154px}
 #hints{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.12);padding:5px 14px;font-size:7px;color:rgba(255,255,255,0.4);letter-spacing:1.5px;white-space:nowrap}
@@ -60,16 +62,16 @@ canvas#c{display:block;position:fixed;top:0;left:0}
 .task-reward{margin-left:auto;color:#ffcc00;font-size:7px;white-space:nowrap}
 
 /* ── MOBILE CONTROLS — landscape d-pad layout ── */
-#mobile-controls{display:none;position:fixed;bottom:0;left:0;right:0;height:180px;pointer-events:none;z-index:20;user-select:none;padding-bottom:env(safe-area-inset-bottom,0px)}
+#mobile-controls{display:none;position:fixed;bottom:0;left:0;right:0;height:200px;pointer-events:none;z-index:20;user-select:none;padding-bottom:env(safe-area-inset-bottom,0px)}
 /* LEFT DPAD: turn arrows */
-#dpad-left{position:absolute;bottom:18px;left:12px;width:160px;height:160px;pointer-events:none}
+#dpad-left{position:absolute;bottom:18px;left:12px;width:140px;height:140px;pointer-events:none}
 /* RIGHT DPAD: gas/brake/reverse */
-#dpad-right{position:absolute;bottom:18px;right:12px;width:160px;height:160px;pointer-events:none}
+#dpad-right{position:absolute;bottom:18px;right:12px;width:140px;height:140px;pointer-events:none}
 /* Action buttons strip in centre-bottom */
-#action-strip{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:10px;pointer-events:all}
+#action-strip{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;pointer-events:all;flex-wrap:nowrap}
 .act-btn{width:70px;height:70px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);background:rgba(0,0,0,0.72);color:#fff;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:0;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:all;flex-shrink:0;-webkit-user-select:none;user-select:none}
 /* D-pad arrow buttons */
-.dpad-btn{width:58px;height:58px;border-radius:12px;border:2px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.7);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:all;position:absolute;-webkit-user-select:none;user-select:none;transition:background 0.05s}
+.dpad-btn{width:52px;height:52px;border-radius:12px;border:2px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.7);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:all;position:absolute;-webkit-user-select:none;user-select:none;transition:background 0.05s}
 .dpad-btn:active{background:rgba(255,255,255,0.15)}
 /* Left dpad: ← → centered row */
 #btn-left{ left:0; top:50%;transform:translateY(-50%); border-color:rgba(0,255,180,0.6);color:#0ffcd4}
@@ -111,6 +113,11 @@ canvas#c{display:block;position:fixed;top:0;left:0}
 .mh-name{flex:1;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:90px}
 .mh-score{color:#ffcc00;font-size:7px}
 .mh-tasks{color:#0ffcd4;font-size:7px}
+@media(max-width:900px),(pointer:coarse){
+  #mp-hud{top:auto;bottom:200px;left:50%;transform:translateX(-50%);font-size:7px;padding:5px 10px;min-width:160px;}
+  #p-objective{top:6px;left:50%;transform:translateX(-50%)}
+  #p-money{top:44px;left:50%;transform:translateX(-50%)}
+}
 #mp-winner{position:fixed;inset:0;z-index:55;background:rgba(0,0,0,0.88);display:none;flex-direction:column;align-items:center;justify-content:center}
 #mp-winner h2{font-size:44px;font-weight:900;letter-spacing:7px;color:#ffcc00}
 #mp-winner .ws{font-size:11px;color:#0ffcd4;margin:18px 0;letter-spacing:2px}
@@ -132,14 +139,20 @@ canvas#c{display:block;position:fixed;top:0;left:0}
   #p-wanted{top:52px;right:6px}
   #p-chase{top:98px;right:6px}
   #p-fine{top:144px;right:6px}
+  /* Objective and money — top centre area, below task toggle */
+  #p-objective{top:6px;left:50%;transform:translateX(-50%);text-align:center}
+  #p-money{top:44px;left:50%;transform:translateX(-50%);text-align:center}
   /* Bottom-right: speed above controls */
   #p-speed{bottom:190px;right:6px;text-align:center}
   #p-speed .val{font-size:22px}
   /* Minimap bottom-left above controls */
   #mm-wrap{width:100px;height:100px;bottom:190px;left:6px}
   #mm{width:100px;height:100px}
-  /* Fuel between minimap and speed */
-  #p-fuel{bottom:190px;left:116px}
+  /* Fuel between minimap and speed, above controls */
+  #p-fuel{bottom:190px;left:116px;text-align:center}
+  /* Action strip: move up so it clears the d-pads and doesn't cover HUD */
+  #action-strip{bottom:18px;gap:6px}
+  .act-btn.sm{width:50px;height:50px;font-size:8px}
 }
 </style>
 </head>
@@ -226,7 +239,7 @@ canvas#c{display:block;position:fixed;top:0;left:0}
     <div class="csub">Press E to leave</div>
   </div>
   <!-- DRAMATIC ACTION OVERLAY -->
-  <div id="drama-overlay" style="display:none;position:fixed;inset:0;z-index:45;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+  <div id="drama-overlay" style="display:none;position:fixed;inset:0;z-index:45;pointer-events:none;flex-direction:column;align-items:center;justify-content:center;">
     <div id="drama-flash" style="position:absolute;inset:0;opacity:0;transition:opacity 0.08s"></div>
     <div id="drama-title" style="font-size:52px;font-weight:900;letter-spacing:8px;color:#fff;text-shadow:0 0 30px currentColor;opacity:0;transform:scale(1.4);transition:all 0.15s;text-align:center"></div>
     <div id="drama-sub"   style="font-size:14px;letter-spacing:4px;color:#fff;margin-top:14px;opacity:0;transition:opacity 0.2s 0.1s;text-align:center"></div>
@@ -305,7 +318,6 @@ var frame = 0;
 var scene, camera, renderer;
 var CV=document.getElementById('c'),MM=document.getElementById('mm'),MC=MM.getContext('2d');
 var W=window.innerWidth,H=window.innerHeight;
-var scene,camera,renderer,clock;
 var running=false,worldBuilt=false,keys={};
 
 var car={mesh:null,x:4,z:4,angle:0,speed:0,steer:0,health:100,fuel:100};
@@ -396,14 +408,37 @@ function setDisplay(id,val){var el=byId(id); if(el) el.style.display=val;}
 function initThree(){
   scene=new THREE.Scene();
   var isMobile=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||('ontouchstart' in window);
+  var isAndroid=/Android/i.test(navigator.userAgent);
   camera=new THREE.PerspectiveCamera(62,W/H,0.5,800);
-  renderer=new THREE.WebGLRenderer({canvas:CV,antialias:false,powerPreference:'high-performance',precision:isMobile?'mediump':'highp'});
+  // Android needs alpha:false and explicit stencil:false to avoid context loss on Mali/Adreno GPUs
+  renderer=new THREE.WebGLRenderer({
+    canvas:CV,
+    antialias:false,
+    powerPreference:'high-performance',
+    precision:isAndroid?'lowp':(isMobile?'mediump':'highp'),
+    alpha:false,
+    stencil:false,
+    depth:true,
+    preserveDrawingBuffer:false
+  });
   renderer.setSize(W,H);
-  renderer.setPixelRatio(isMobile?1:Math.min(window.devicePixelRatio,1.5));
-  renderer.shadowMap.enabled=!isMobile; // shadows off on mobile for visibility
-  if(!isMobile)renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.setPixelRatio(isMobile?Math.min(window.devicePixelRatio,1.5):Math.min(window.devicePixelRatio,1.5));
+  renderer.shadowMap.enabled=false; // shadows off on all mobile/Android for reliability
   clock=new THREE.Clock();
   CV.style.width='100vw';CV.style.height='100vh';CV.style.position='fixed';CV.style.top='0';CV.style.left='0';CV.style.zIndex='1';
+
+  // Handle WebGL context loss (Android Chrome aggressively reclaims GPU memory)
+  CV.addEventListener('webglcontextlost',function(e){
+    e.preventDefault();
+    running=false;
+    showNotify('GPU context lost — restoring…',0,'#ffcc00');
+  },false);
+  CV.addEventListener('webglcontextrestored',function(){
+    // Reinitialise renderer state after context restore
+    renderer.setSize(W,H);
+    if(worldBuilt&&!running){running=true;showNotify('Restored!',1500,'#0ffcd4');}
+  },false);
+
   window.addEventListener('resize',function(){
     W=window.innerWidth;H=window.innerHeight;
     camera.aspect=W/H;camera.updateProjectionMatrix();
@@ -2002,7 +2037,8 @@ function updateClub(dt){
 // ═══════════════════════════════════════════════
 // HUD
 // ═══════════════════════════════════════════════
-function updateHUD(){
+function updateHUD(dt){
+  dt=dt||0.016;
   setText('hspeed',Math.round(Math.abs(car.speed)*10));
   setText('hkills',kills);setText('hscore',score);
   setText('hhealth',Math.max(0,Math.round(car.health)));
@@ -2033,7 +2069,7 @@ function updateHUD(){
       setDisplay('p-fine','none');
     }
   }
-  if(fineActive){fineTimer-=0.016;if(fineTimer<=0){fineActive=false;setDisplay('p-fine','none');}}
+  if(fineActive){fineTimer-=dt;if(fineTimer<=0){fineActive=false;setDisplay('p-fine','none');}}
   checkMissionProgress();
   updateMissionUI();
 }
@@ -2041,7 +2077,8 @@ function updateHUD(){
 // ═══════════════════════════════════════════════
 // CAMERA
 // ═══════════════════════════════════════════════
-function updateCamera(){
+function updateCamera(dt){
+  dt=dt||0.016;
   if(inClub)return;
   var BK=16,UP=7;
   var tx=car.x-Math.sin(car.angle)*BK,tz=car.z-Math.cos(car.angle)*BK;
@@ -2052,7 +2089,7 @@ function updateCamera(){
     camera.position.x+=( Math.random()-0.5)*shakeIntensity;
     camera.position.y+=( Math.random()-0.5)*shakeIntensity*0.5;
     camera.position.z+=( Math.random()-0.5)*shakeIntensity;
-    shakeTimer-=0.016;
+    shakeTimer-=dt;
   }
   camLook.lerp(new THREE.Vector3(car.x,1.6,car.z),0.10);
   camera.lookAt(camLook);
@@ -2100,7 +2137,6 @@ function blinkAntennas(){
 // ═══════════════════════════════════════════════
 // NOTIFY
 // ═══════════════════════════════════════════════
-var notifyTO=null;
 function showNotify(msg,dur,col){
   var el=byId('notify');
   el.textContent=msg;el.style.borderColor=col||'#ffcc00';el.style.color=col||'#ffcc00';el.style.display='block';
@@ -2130,8 +2166,7 @@ function cameraShake(dur, intensity){shakeTimer=dur;shakeIntensity=intensity;}
 function triggerDrama(title, sub, reward, flashCol, cb){
   var ov=byId('drama-overlay'), fl=byId('drama-flash'), tl=byId('drama-title'), sb=byId('drama-sub'), rw=byId('drama-reward');
   // reset
-  ov.style.display='flex';
-  fl.style.background=flashCol||'#ffffff'; fl.style.opacity=0.7;
+  ov.style.display='flex'; fl.style.opacity=0.7;
   tl.textContent=title; tl.style.color=flashCol||'#ffffff'; tl.style.textShadow='0 0 40px '+flashCol; tl.style.opacity=0; tl.style.transform='scale(1.5)';
   sb.textContent=sub||''; sb.style.color=flashCol||'#cccccc'; sb.style.opacity=0;
   rw.textContent=reward||''; rw.style.color='#ffcc00'; rw.style.opacity=0; rw.style.transform='translateY(20px)';
@@ -2387,7 +2422,7 @@ function checkMissionProgress(){
   if(!missions.chase  &&chaseEscaped)      completeMission('chase',  200,'MISSION: ESCAPE CHASE');
   if(!missions.lapright&&pumpBlown)        completeMission('lapright',180,'MISSION: PUMP EXPLODED');
   trackLap();
-  updateSurviveTask(0.016);
+  // NOTE: updateSurviveTask is called with real dt in loop() — do NOT call it again here
 }
 
 
@@ -2459,17 +2494,17 @@ function loop(){
       updateCops(dt);
       chaseTimer-=dt;
       if(chaseTimer<=0){chaseActive=false;chaseTimer=0;killsSince=0;removeCops();setDisplay('p-chase','none');stopSiren();if(chaseEverStarted)chaseEscaped=true;showNotify('Police gave up!',2000,'#0ffcd4');}
-      updateSurviveTask(dt);
     }
+    updateSurviveTask(dt); // always called so timer resets correctly when chase ends
     checkKills();
-    updateCamera();
+    updateCamera(dt);
   }
   updatePeds(dt);
   updateClub(dt);
   updateBank(dt);
   updateWeaponShop(dt);
   updateParticles(dt);
-  updateHUD();
+  updateHUD(dt);
   updateMinimap();
   blinkAntennas();
   // Pulse interaction rings
@@ -2626,7 +2661,9 @@ function mpConnect(){
       mpMode=true;
       setDisplay('mp-hud','block');
       startGame();
-      mpSpawnOthers();
+      _installMpMissionHook();
+      // Defer spawning others until after world is guaranteed built
+      setTimeout(function(){mpSpawnOthers();},100);
     });
     socket.on('playerMoved',function(id,data){
       if(!mpMode)return;
@@ -2668,12 +2705,18 @@ function mpConnect(){
 function mpCreateRoom(){
   var name=(byId('mp-name').value||'').trim().toUpperCase();
   if(!name){mpErr('Enter your name');return;}
+  mpErr('Connecting…');
   mpConnect();
-  setTimeout(function(){
+  function doCreate(){
     if(!socket||!socket.connected){mpErr('Not connected to server');return;}
     socket.emit('createRoom',{name:name,carModel:selectedCarModel});
     mpErr('');
-  },400);
+  }
+  if(socket&&socket.connected){doCreate();}
+  else{
+    var t=setTimeout(function(){mpErr('Connection timed out');},5000);
+    socket.once('connect',function(){clearTimeout(t);doCreate();});
+  }
 }
 function mpShowJoin(){
   mpConnect();
@@ -2832,14 +2875,22 @@ setInterval(function(){
 },100);
 
 // ── Hook completeMission to emit to server ──
-var _origCompleteMission=completeMission;
-completeMission=function(name,reward,msg){
-  _origCompleteMission(name,reward,msg);
-  mpMissionCount++;
-  if(mpMode&&socket&&socket.connected){
-    socket.emit('missionDone',{key:name,missions:missions,score:score,money:money});
-  }
-};
+// Use a flag rather than monkey-patching to avoid reference errors
+var _mpMissionHookInstalled=false;
+function _installMpMissionHook(){
+  if(_mpMissionHookInstalled)return;
+  _mpMissionHookInstalled=true;
+  var _origCompleteMission=completeMission;
+  completeMission=function(name,reward,msg){
+    _origCompleteMission(name,reward,msg);
+    mpMissionCount++;
+    if(mpMode&&socket&&socket.connected){
+      socket.emit('missionDone',{key:name,missions:missions,score:score,money:money});
+    }
+  };
+}
+// Install hook when entering MP mode
+socket&&socket.on&&(function(){})(); // hook installed below when socket connects
 
 
 </script>
