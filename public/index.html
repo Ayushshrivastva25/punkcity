@@ -407,47 +407,26 @@ function setDisplay(id,val){var el=byId(id); if(el) el.style.display=val;}
 // ═══════════════════════════════════════════════
 function initThree(){
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x6699e6); // day sky blue fallback — visible if shader fails
+  scene.background=new THREE.Color(0x6699e6);
   var isMobile=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||('ontouchstart' in window);
   camera=new THREE.PerspectiveCamera(62,W/H,0.5,800);
-  // mediump is the universal safe choice — lowp breaks Lambert lighting math on Adreno/Mali
-  renderer=new THREE.WebGLRenderer({
-    canvas:CV,
-    antialias:false,
-    powerPreference:'high-performance',
-    precision:'mediump',
-    alpha:false,
-    stencil:false,
-    depth:true,
-    preserveDrawingBuffer:false
-  });
+
+  // Bare-minimum renderer config — extra flags break WebGL context creation on Android Chrome
+  renderer=new THREE.WebGLRenderer({canvas:CV,antialias:false});
   renderer.setSize(W,H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setClearColor(0x000000,1);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
   renderer.shadowMap.enabled=false;
 
-  // On mobile/Android: replace MeshLambertMaterial with MeshBasicMaterial globally.
-  // Lambert requires working lights; on Android low-power GPUs it renders black.
-  // MeshBasicMaterial uses color/map directly — always visible, no lighting needed.
+  // Mobile: swap Lambert → Basic so geometry shows without lighting
   if(isMobile){
-    THREE.MeshLambertMaterial=function(params){
-      return new THREE.MeshBasicMaterial(params||{});
-    };
+    THREE.MeshLambertMaterial=function(p){return new THREE.MeshBasicMaterial(p||{});};
   }
-  clock=new THREE.Clock();
-  CV.style.width='100vw';CV.style.height='100vh';CV.style.position='fixed';CV.style.top='0';CV.style.left='0';CV.style.zIndex='1';
 
-  // Handle WebGL context loss (Android Chrome aggressively reclaims GPU memory)
-  CV.addEventListener('webglcontextlost',function(e){
-    e.preventDefault();
-    running=false;
-    showNotify('GPU context lost — restoring…',0,'#ffcc00');
-  },false);
-  CV.addEventListener('webglcontextrestored',function(){
-    // Reinitialise renderer state after context restore
-    renderer.setSize(W,H);
-    if(worldBuilt&&!running){running=true;showNotify('Restored!',1500,'#0ffcd4');}
-  },false);
+  clock=new THREE.Clock();
+  CV.style.cssText='display:block;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:1';
+
+  CV.addEventListener('webglcontextlost',function(e){e.preventDefault();running=false;},false);
+  CV.addEventListener('webglcontextrestored',function(){renderer.setSize(W,H);if(worldBuilt)running=true;},false);
 
   window.addEventListener('resize',function(){
     W=window.innerWidth;H=window.innerHeight;
@@ -460,44 +439,41 @@ function initThree(){
 // SKY (updatable for day/night)
 // ═══════════════════════════════════════════════
 function buildSky(){
-  // On Android, ShaderMaterial with BackSide writes to the depth buffer and occludes
-  // all geometry inside the sphere. Fix: depthWrite:false + renderOrder=-1 so sky
-  // always draws behind everything else without touching the depth buffer.
-  var isMobileDevice=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||('ontouchstart' in window);
-  var geo=new THREE.SphereGeometry(550,16,8); // lower segments on mobile
-  skyMesh=new THREE.ShaderMaterial({
-    side:THREE.BackSide,
-    depthWrite:false,   // CRITICAL: don't write to depth buffer — fixes Android occlusion bug
-    depthTest:false,    // sky is always "behind" everything
-    uniforms:{
-      dayFactor:{value:1.0}
-    },
-    // Explicit mediump precision required for Android GLSL compiler
-    vertexShader:[
-      'precision mediump float;',
-      'varying float vY;',
-      'void main(){',
-      '  vY=position.y;',
-      '  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);',
-      '}'
-    ].join('\n'),
-    fragmentShader:[
-      'precision mediump float;',
-      'uniform float dayFactor;',
-      'varying float vY;',
-      'void main(){',
-      '  float t=clamp(vY/350.0,0.0,1.0);',
-      '  vec3 dBot=vec3(0.4,0.6,0.9);vec3 dMid=vec3(0.6,0.78,1.0);vec3 dTop=vec3(0.2,0.45,0.85);',
-      '  vec3 nBot=vec3(0.04,0.0,0.12);vec3 nMid=vec3(0.08,0.02,0.18);vec3 nTop=vec3(0.01,0.0,0.06);',
-      '  vec3 bot=mix(nBot,dBot,dayFactor);vec3 mid=mix(nMid,dMid,dayFactor);vec3 top=mix(nTop,dTop,dayFactor);',
-      '  vec3 col=mix(bot,mid,clamp(t*2.0,0.0,1.0));col=mix(col,top,clamp((t-0.5)*2.0,0.0,1.0));',
-      '  gl_FragColor=vec4(col,1.0);',
-      '}'
-    ].join('\n')
-  });
-  var skyMesh3d=new THREE.Mesh(geo,skyMesh);
-  skyMesh3d.renderOrder=-1; // render sky first, before all scene objects
-  scene.add(skyMesh3d);
+  var isMob=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||('ontouchstart' in window);
+
+  if(isMob){
+    // Mobile: skip custom shader entirely — scene.background handles sky colour
+    // Just add stars and moon as Basic meshes
+    skyMesh=null; // no shader needed
+  } else {
+    // Desktop: full shader sky
+    var geo=new THREE.SphereGeometry(550,16,8);
+    skyMesh=new THREE.ShaderMaterial({
+      side:THREE.BackSide,
+      depthWrite:false,
+      depthTest:false,
+      uniforms:{dayFactor:{value:1.0}},
+      vertexShader:[
+        'precision mediump float;',
+        'varying float vY;',
+        'void main(){vY=position.y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}'
+      ].join('\n'),
+      fragmentShader:[
+        'precision mediump float;',
+        'uniform float dayFactor;varying float vY;',
+        'void main(){',
+        '  float t=clamp(vY/350.0,0.0,1.0);',
+        '  vec3 dBot=vec3(0.4,0.6,0.9);vec3 dTop=vec3(0.2,0.45,0.85);',
+        '  vec3 nBot=vec3(0.04,0.0,0.12);vec3 nTop=vec3(0.01,0.0,0.06);',
+        '  vec3 bot=mix(nBot,dBot,dayFactor);vec3 top=mix(nTop,dTop,dayFactor);',
+        '  gl_FragColor=vec4(mix(bot,top,t),1.0);',
+        '}'
+      ].join('\n')
+    });
+    var skyMesh3d=new THREE.Mesh(geo,skyMesh);
+    skyMesh3d.renderOrder=-1;
+    scene.add(skyMesh3d);
+  }
 
   // Stars (only visible at night via opacity)
   var sg=new THREE.BufferGeometry(),sv=[];
@@ -681,15 +657,12 @@ function buildWorld(){
   var isMobLight=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||('ontouchstart' in window);
   ambLight=new THREE.AmbientLight(0xffffff,isMobLight?5.0:3.5);scene.add(ambLight); // extra bright on mobile
   sunLight=new THREE.DirectionalLight(0xffffff,2.2);
-  sunLight.position.set(120,250,80);sunLight
-  sunLight.shadow.mapSize.width=sunLight.shadow.mapSize.height=1024;
-  sunLight.shadow.camera.left=sunLight.shadow.camera.bottom=-500;
-  sunLight.shadow.camera.right=sunLight.shadow.camera.top=500;
-  sunLight.shadow.camera.far=700;scene.add(sunLight);
+  sunLight.position.set(120,250,80);
+  scene.add(sunLight);
 
   // Ground
   var gnd=new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),new THREE.MeshBasicMaterial({map:makeAsphalt()}));
-  gnd.rotation.x=-Math.PI/2;gndscene.add(gnd);
+  gnd.rotation.x=-Math.PI/2;scene.add(gnd);
 
   // Road markings
   var ym=new THREE.MeshBasicMaterial({color:0xccbb22}),wm=new THREE.MeshBasicMaterial({color:0xdddddd});
