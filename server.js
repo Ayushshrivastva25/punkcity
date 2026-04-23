@@ -170,6 +170,15 @@ io.on('connection', socket => {
     }
   });
 
+  // ── PVP HIT ──
+  socket.on('pvpHit', ({ targetId, damage }) => {
+    const code = getRoomCode(socket.id);
+    if (!code) return;
+    // Relay damage to the target player only
+    const targetSocket = io.sockets.sockets.get(targetId);
+    if (targetSocket) targetSocket.emit('pvpHit', Math.min(damage, 15));
+  });
+
   // ── LEAVE ROOM ──
   socket.on('leaveRoom', () => {
     const code = getRoomCode(socket.id);
