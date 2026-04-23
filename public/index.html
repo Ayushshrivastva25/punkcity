@@ -423,6 +423,7 @@ function initThree(){
   });
   renderer.setSize(W,H);
   renderer.setPixelRatio(isMobile?Math.min(window.devicePixelRatio,1.5):Math.min(window.devicePixelRatio,1.5));
+  renderer.setClearColor(0x000000,1); // explicit opaque black clear — prevents Android transparency compositing bug
   renderer.shadowMap.enabled=false; // shadows off on all mobile/Android for reliability
   clock=new THREE.Clock();
   CV.style.width='100vw';CV.style.height='100vh';CV.style.position='fixed';CV.style.top='0';CV.style.left='0';CV.style.zIndex='1';
@@ -450,21 +451,34 @@ function initThree(){
 // SKY (updatable for day/night)
 // ═══════════════════════════════════════════════
 function buildSky(){
-  var geo=new THREE.SphereGeometry(550,32,16);
+  // On Android, ShaderMaterial with BackSide writes to the depth buffer and occludes
+  // all geometry inside the sphere. Fix: depthWrite:false + renderOrder=-1 so sky
+  // always draws behind everything else without touching the depth buffer.
+  var isMobileDevice=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||('ontouchstart' in window);
+  var geo=new THREE.SphereGeometry(550,16,8); // lower segments on mobile
   skyMesh=new THREE.ShaderMaterial({
     side:THREE.BackSide,
+    depthWrite:false,   // CRITICAL: don't write to depth buffer — fixes Android occlusion bug
+    depthTest:false,    // sky is always "behind" everything
     uniforms:{
       dayFactor:{value:1.0}
     },
-    vertexShader:'varying float vY;void main(){vY=position.y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+    // Explicit mediump precision required for Android GLSL compiler
+    vertexShader:[
+      'precision mediump float;',
+      'varying float vY;',
+      'void main(){',
+      '  vY=position.y;',
+      '  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);',
+      '}'
+    ].join('\n'),
     fragmentShader:[
+      'precision mediump float;',
       'uniform float dayFactor;',
       'varying float vY;',
       'void main(){',
       '  float t=clamp(vY/350.0,0.0,1.0);',
-      // day colours
       '  vec3 dBot=vec3(0.4,0.6,0.9);vec3 dMid=vec3(0.6,0.78,1.0);vec3 dTop=vec3(0.2,0.45,0.85);',
-      // night colours
       '  vec3 nBot=vec3(0.04,0.0,0.12);vec3 nMid=vec3(0.08,0.02,0.18);vec3 nTop=vec3(0.01,0.0,0.06);',
       '  vec3 bot=mix(nBot,dBot,dayFactor);vec3 mid=mix(nMid,dMid,dayFactor);vec3 top=mix(nTop,dTop,dayFactor);',
       '  vec3 col=mix(bot,mid,clamp(t*2.0,0.0,1.0));col=mix(col,top,clamp((t-0.5)*2.0,0.0,1.0));',
@@ -472,7 +486,9 @@ function buildSky(){
       '}'
     ].join('\n')
   });
-  scene.add(new THREE.Mesh(geo,skyMesh));
+  var skyMesh3d=new THREE.Mesh(geo,skyMesh);
+  skyMesh3d.renderOrder=-1; // render sky first, before all scene objects
+  scene.add(skyMesh3d);
 
   // Stars (only visible at night via opacity)
   var sg=new THREE.BufferGeometry(),sv=[];
@@ -639,10 +655,13 @@ function buildBillboard(wx,wz,facing,col,keyLabel,topLine,botLine){
 
 function buildWorld(){
   buildSky();
-  scene.fog=new THREE.FogExp2(0x88aacc,0.0012); // lighter fog for mobile // fog also changes with day/night via color
+  // Fog color matches sky bottom (day: #6699e6, night: #0a0020). Density reduced on mobile.
+  var isMob=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||('ontouchstart' in window);
+  scene.fog=new THREE.FogExp2(0x6699e6, isMob?0.0008:0.0012);
 
   // Lights — stored for day/night control
-  ambLight=new THREE.AmbientLight(0xffffff,3.5);scene.add(ambLight); // boosted for mobile
+  var isMobLight=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||('ontouchstart' in window);
+  ambLight=new THREE.AmbientLight(0xffffff,isMobLight?5.0:3.5);scene.add(ambLight); // extra bright on mobile
   sunLight=new THREE.DirectionalLight(0xffffff,2.2);
   sunLight.position.set(120,250,80);sunLight.castShadow=true;
   sunLight.shadow.mapSize.width=sunLight.shadow.mapSize.height=1024;
