@@ -718,10 +718,10 @@ function buildWorld(){
 
 function makeBlock(bx,bz,swTex,hue){
   var sw=new THREE.Mesh(new THREE.BoxGeometry(44,0.35,44),new THREE.MeshLambertMaterial({map:swTex}));
-  sw.position.set(bx,0.175,bz);swscene.add(sw);
+  sw.position.set(bx,0.175,bz);scene.add(sw);
   var h=14+Math.random()*72;
   var bldg=new THREE.Mesh(new THREE.BoxGeometry(28,h,28),new THREE.MeshLambertMaterial({map:makeBldgTex(hue)}));
-  bldg.position.set(bx,h/2+0.35,bz);bldgbldgscene.add(bldg);
+  bldg.position.set(bx,h/2+0.35,bz);scene.add(bldg);
   scene.add(new THREE.Mesh(new THREE.BoxGeometry(28,0.7,28),new THREE.MeshLambertMaterial({color:0x090912})));
   scene.children[scene.children.length-1].position.set(bx,h+0.7,bz);
   if(Math.random()>0.5){
@@ -741,7 +741,7 @@ function buildClub(bx,bz,swTex){
 
   // Main hull — low purple building
   var hull=new THREE.Mesh(new THREE.BoxGeometry(32,12,32),new THREE.MeshLambertMaterial({color:0x180028}));
-  hull.position.set(bx,6.35,bz);hullscene.add(hull);
+  hull.position.set(bx,6.35,bz);scene.add(hull);
 
   // Facade neon strips
   var nCols=[0xff0066,0x00ffcc,0xff9900,0xcc00ff];
