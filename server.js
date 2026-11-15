@@ -31,7 +31,7 @@ app.get('*', (req, res) =>
 const rooms = {};
 const PLAYER_COLORS = ['#00ffcc','#ff4433','#ffcc00','#ff44cc'];
 const MAX_PLAYERS   = 3;
-const TOTAL_MISSIONS = 14;
+const TOTAL_MISSIONS = 10;   // story missions (bonus challenges don't count)
 const ROOM_TIMEOUT_MS = 60 * 60 * 1000; // auto-clean rooms after 1 hour
 
 // ─── Helpers ──────────────────────────────────
@@ -142,11 +142,13 @@ io.on('connection', socket => {
     if (!code) return;
     const p = rooms[code].players[socket.id];
     if (!p) return;
-    p.x = data.x; p.z = data.z;
-    p.angle = data.angle; p.speed = data.speed;
+    const num = v => (typeof v === 'number' && isFinite(v)) ? v : 0;
+    p.x = num(data.x); p.z = num(data.z);
+    p.angle = num(data.angle); p.speed = num(data.speed);
     // Broadcast to others only (not sender)
     socket.to(code).emit('playerMoved', socket.id, {
-      x: p.x, z: p.z, angle: p.angle, speed: p.speed, name: p.name
+      x: p.x, z: p.z, angle: p.angle, vx: num(data.vx), vz: num(data.vz),
+      hidden: !!data.hidden, model: (data.model | 0) % 5, name: p.name
     });
   });
 
@@ -156,14 +158,17 @@ io.on('connection', socket => {
     if (!code) return;
     const p = rooms[code].players[socket.id];
     if (!p) return;
-    p.missions = missions || p.missions;
-    p.score    = score   || p.score;
-    p.money    = money   || p.money;
+    // keep only completed (true) mission flags — the old code counted false entries too
+    const clean = {};
+    if (missions && typeof missions === 'object') Object.keys(missions).slice(0, 20).forEach(k => { if (missions[k] === true) clean[k] = true; });
+    p.missions = clean;
+    p.score    = Number.isFinite(score) ? score : p.score;
+    p.money    = Number.isFinite(money) ? money : p.money;
     // Broadcast updated leaderboard
     broadcastRoom(code);
 
     // Check win: first player to complete all missions
-    const done = Object.keys(p.missions).length;
+    const done = Object.keys(p.missions).length;   // only truthy entries are stored now
     if (done >= TOTAL_MISSIONS) {
       io.to(code).emit('gameWin', socket.id, p.name);
       console.log(`${p.name} wins room ${code}!`);
