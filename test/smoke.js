@@ -61,7 +61,7 @@ const dir = path.join(__dirname, '../public/js');
   catch (e) { errors.push('LOAD ' + f + ': ' + e.stack.split('\n').slice(0, 3).join(' | ')); }
 });
 const run = (code, label) => { try { return vm.runInContext(code, sandbox); } catch (e) { errors.push(label + ': ' + e.stack.split('\n').slice(0, 4).join(' | ')); } };
-const frames = (n, label, pre) => { for (let i = 0; i < n; i++) { try { if (pre) vm.runInContext(pre, sandbox); vm.runInContext('(function(){var dt=0.016; if(G.running&&!G.paused){G.t+=dt; if(G.mode==="car"){G.tod=(G.tod+dt*0.08)%24;updateCarMode(dt);updateCops(dt);updatePeds(dt);updateParticles(dt);updateMissions(dt);updateCarCamera(dt);updateSky(G.tod,W.camera.position);updateWorldFx(dt);}else{updateFoot(dt);} updateHUD(dt);} })()', sandbox); } catch (e) { errors.push(label + ' frame ' + i + ': ' + e.stack.split('\n').slice(0, 5).join(' | ')); return; } } };
+const frames = (n, label, pre) => { for (let i = 0; i < n; i++) { try { if (pre) vm.runInContext(pre, sandbox); vm.runInContext('(function(){var dt=0.016; if(G.running&&!G.paused){G.t+=dt; if(G.mode==="car"){G.tod=(G.tod+dt*0.08)%24;updateCarMode(dt);updateCops(dt);updatePeds(dt);updateParticles(dt);updateMissions(dt);mpModeUpdate(dt);updateCarCamera(dt);updateSky(G.tod,W.camera.position);updateWorldFx(dt);}else{updateFoot(dt);} updateHUD(dt);} })()', sandbox); } catch (e) { errors.push(label + ' frame ' + i + ': ' + e.stack.split('\n').slice(0, 5).join(' | ')); return; } } };
 
 run('window.addEventListener=function(){}; setupInput(); buildCarChips(); initHud();', 'setup');
 run('startGame()', 'startGame');
@@ -110,5 +110,36 @@ run('for(var i=0;i<12;i++){ if(G.m.cur<MAIN.length){ var m=MAIN[G.m.cur]; comple
 console.log('won:', run('G.over'), 'cur', run('G.m.cur'));
 run('resetGame()', 'reset'); frames(30, 'after reset');
 run('pause=togglePause();toggleOverlay("map-ov");drawFullMap();buildMissionPanel();closeOverlays()', 'overlays');
+
+// ───────── multiplayer modes (fake socket, real client code) ─────────
+console.log('\n[multiplayer]');
+run('mp.socket={sent:[],emit:function(n,d){this.sent.push([n,d]);}}; mp.myId="me"; mp.players={me:{name:"ME",color:"#0f0",role:null},b:{name:"BOB",color:"#f00",role:null}};', 'mp setup');
+const info = { mode: 'race', cps: [{x:-210,z:-210},{x:0,z:-210},{x:210,z:-210},{x:210,z:0},{x:210,z:210},{x:0,z:210},{x:-210,z:210},{x:-210,z:0}], laps: 2, starts: { me: { x: -234, z: -214, a: Math.PI / 2 }, b: { x: -234, z: -206, a: Math.PI / 2 } } };
+run('mpOnGameStart(mp.players,' + JSON.stringify(info) + ')', 'race start');
+console.log('race: frozen at start', run('G.freeze'), 'pos', run('Math.round(G.car.x)+","+Math.round(G.car.z)'), 'heading', run('G.car.a.toFixed(2)'), 'peds', run('G.peds.length'), 'gm', run('G.gm'));
+run('keys["w"]=true','k'); frames(60, 'frozen'); console.log('  speed while frozen', run('Math.hypot(G.car.vx,G.car.vz).toFixed(1)'));
+run('mpOnCountdown(0)', 'go'); frames(120, 'racing'); console.log('  speed after GO', run('Math.hypot(G.car.vx,G.car.vz).toFixed(1)'), 'interact', run('G.interact'));
+console.log('  hud', run('JSON.stringify(mpHudInfo())'), 'target', run('JSON.stringify(mpTarget())'));
+run('G.car.x=0;G.car.z=-210;G.car.vx=0;G.car.vz=0', 'tp cp1'); frames(3, 'cp'); console.log('  sent', run('JSON.stringify(mp.socket.sent.filter(function(x){return x[0]==="cpHit"}))'));
+run('mpOnCpOK(1)', 'ok'); console.log('  next target', run('JSON.stringify(mpTarget())'), 'respawn point', run('JSON.stringify(mp.lastCp)'));
+run('G.car.x=50;G.car.z=-100;G.car.health=0.5;G.grace=0;applyDamage(20,40)', 'wreck'); console.log('  after wreck: health', run('G.car.health'), 'at', run('Math.round(G.car.x)+","+Math.round(G.car.z)'), 'over', run('G.over'));
+run('mpOnRaceEnd([{id:"b",pos:1,name:"BOB",finishedAt:61234},{id:"me",pos:2,name:"ME",finishedAt:65000}])', 'end'); console.log('  end title', run('$("mp-win-name").textContent'), '| list', run('$("mp-win-list").innerHTML.length > 10'));
+// chase as robber
+run('keys={};G.over=false;G.running=true;', 'reset flags');
+const ci = { mode: 'chase', robber: 'me', time: 150, starts: { me: { x: 4, z: 4, a: 0 }, b: { x: 0, z: -150, a: Math.PI } } };
+run('mp.players={me:{name:"ME",color:"#0f0",role:"robber"},b:{name:"BOB",color:"#f00",role:"cop"}}; mpOnGameStart(mp.players,' + JSON.stringify(ci) + ')', 'chase start');
+run('mpOnCountdown(0)', 'go'); run('mpRemoteUpdate("b",{x:0,z:-150,angle:3.14,vx:0,vz:0,hidden:false,model:0,role:"cop"})', 'remote cop');
+frames(120, 'chase'); console.log('robber: stars', run('G.stars'), 'cops(AI)', run('G.cops.length'), 'hud', run('JSON.stringify(mpHudInfo())'));
+run('mp.chase={t:120,bust:2.5}', 'cs'); console.log('  hud with bust', run('JSON.stringify(mpHudInfo())'), 'timer', run('mpTimer()'));
+run('G.car.health=0.2;G.grace=0;applyDamage(30,45)', 'wreck robber'); console.log('  robber wreck emits', run('JSON.stringify(mp.socket.sent.filter(function(x){return x[0]==="robberWrecked"}).length)'));
+run('mpOnChaseEnd({winner:"cops",reason:"THE ROBBER WAS WRECKED",robber:"me"})', 'end'); console.log('  robber sees:', run('$("mp-win-name").textContent'));
+// chase as cop
+run('G.over=false;G.running=true;mp.role="cop";mp.players.me.role="cop";mp.players.b.role="robber";mp.info.robber="b";', 'swap');
+run('mpOnGameStart(mp.players,' + JSON.stringify({ mode: 'chase', robber: 'b', time: 150, starts: { me: { x: 0, z: -150, a: Math.PI }, b: { x: 4, z: 4, a: 0 } } }) + ')', 'cop start');
+run('mpOnCountdown(0)', 'go'); run('mpRemoteUpdate("b",{x:4,z:4,angle:0,vx:0,vz:0,hidden:false,model:0,role:"robber"})', 'remote robber');
+frames(60, 'cop'); console.log('cop: police mesh', run('!!G.carMesh.userData.sirenL'), 'target', run('JSON.stringify(mpTarget())'));
+run('G.car.health=100;G.grace=0;applyDamage(30,45)', 'cop dmg'); console.log('  cop health after big hit (invulnerable)', run('G.car.health'));
+run('G.gm="story";mp.active=false;mp.mode="story";document.body.classList.remove("gm-chase")', 'back');
+
 console.log(errors.length ? '\nERRORS:\n' + errors.join('\n') : '\nNO RUNTIME ERRORS');
 process.exit(errors.length ? 1 : 0);

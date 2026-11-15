@@ -16,6 +16,12 @@ Multiplayer open-city driving game (Three.js + Node/Socket.IO). `npm install && 
 * Inside the bank / club / tune shop the city is hidden and frozen — nothing can hit you, the camera stays in the room.
 * 10 story missions (fuel → rampage → shake the cops → garage → delivery → street race → bank heist → lay low → upgrade → ring-road lap) + 4 bonus challenges. First to finish all 10 wins in multiplayer.
 
+## Multiplayer modes (pick when you create a room, up to 3 players)
+* **Story Race** — first to finish all 10 missions.
+* **Street Race** — 3-2-1 countdown, 2 laps of an 8-checkpoint loop, live positions, podium. The server accepts checkpoints only in order and only if you were actually near them. Wreck out and you respawn at your last checkpoint (R does the same).
+* **Cops vs Robber** — one random player is the robber, the rest drive indestructible police cars. Cops win by staying within 10 units for 5 seconds (bust meter) or wrecking the robber; the robber wins by surviving 150 seconds.
+No AI cops, pedestrians or shops in the versus modes. Game rules live in `modes.js` (server-side, unit-tested in `test/modes.test.js`).
+
 ## Layout
 `public/js/core.js` pure logic (collision, physics, road graph) · `world.js` city · `entities.js` car/human meshes · `interiors.js` rooms · `game.js` loop/input/cops/peds · `missions.js` · `foot.js` on-foot gameplay · `hud.js` HUD & maps · `mp.js` multiplayer.
 

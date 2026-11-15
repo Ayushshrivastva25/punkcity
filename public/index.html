@@ -147,6 +147,9 @@ body.desktop #speedo{left:auto;right:calc(var(--sr) + var(--pad));transform:none
 #mp-winner{z-index:55}
 #mp-winner h2{font-size:calc(var(--fs)*4);font-weight:900;letter-spacing:.2em;color:#ffcc00}
 .other-label{position:fixed;z-index:9;transform:translate(-50%,-100%);font-size:calc(var(--fs)*.85);font-weight:700;letter-spacing:.1em;padding:.15em .6em;background:rgba(0,0,0,.6);border:1px solid;border-radius:4px;pointer-events:none;display:none;white-space:nowrap}
+#countdown{position:fixed;left:0;right:0;top:34%;text-align:center;z-index:46;pointer-events:none;font-weight:900;font-size:calc(var(--fs)*7);color:#fff;text-shadow:0 0 30px #0ffcd4,0 0 6px #000;letter-spacing:.1em;display:none}
+body.gm-race #wanted,body.gm-chase #wanted{display:none}
+body.gm-race #money,body.gm-chase #money{display:none}
 #rotate-msg{display:none;position:fixed;inset:0;z-index:9999;background:#000;color:var(--cy);font-size:18px;letter-spacing:.2em;align-items:center;justify-content:center;text-align:center;flex-direction:column;gap:14px}
 
 /* ───────── touch controls ───────── */
@@ -187,6 +190,7 @@ body.foot #t-act{right:calc(var(--sr) + var(--pad)*1.5 + var(--btn)*.1);bottom:c
   <div class="sub">DRIVE · ROB · ESCAPE THE POLICE</div>
   <input class="mp-input" id="mp-name" placeholder="YOUR NAME" maxlength="12" autocomplete="off"/>
   <div class="chips" id="car-chips"></div>
+  <div class="chips" id="mode-chips" title="Game mode when you create a room"></div>
   <div class="row" id="title-btns">
     <button class="btn btn-cyan" id="btn-solo-play">SOLO PLAY</button>
     <button class="mp-btn gold" id="btn-create-room">CREATE ROOM</button>
@@ -199,6 +203,7 @@ body.foot #t-act{right:calc(var(--sr) + var(--pad)*1.5 + var(--btn)*.1);bottom:c
   <div id="mp-error"></div>
   <div id="mp-waiting" style="display:none;flex-direction:column;align-items:center;gap:.7em">
     <div class="lbl">ROOM CODE — SHARE WITH FRIENDS (MAX 3)</div>
+    <div id="mp-mode-tag" style="color:#ffcc00;letter-spacing:.2em;font-size:var(--fs)"></div>
     <div id="mp-room-code"></div>
     <div id="mp-players-list"></div>
     <div class="row">
@@ -264,6 +269,7 @@ body.foot #t-act{right:calc(var(--sr) + var(--pad)*1.5 + var(--btn)*.1);bottom:c
   <button class="tb" id="t-act">ACT</button>
 </div>
 
+<div id="countdown"></div>
 <div id="drama"><div id="drama-flash"></div><div id="drama-title"></div><div id="drama-sub"></div><div id="drama-reward"></div></div>
 
 <!-- ═════════ OVERLAYS ═════════ -->
@@ -299,6 +305,7 @@ body.foot #t-act{right:calc(var(--sr) + var(--pad)*1.5 + var(--btn)*.1);bottom:c
 <div class="screen" id="mp-winner">
   <h2 id="mp-win-name">PLAYER WINS!</h2>
   <div class="gs" id="mp-win-sub"></div>
+  <div id="mp-win-list" style="margin-bottom:1.2em;letter-spacing:.12em;line-height:1.9"></div>
   <button class="btn btn-cyan" onclick="location.reload()">PLAY AGAIN</button>
 </div>
 

@@ -18,6 +18,7 @@ var G = {
   money: 0, score: 0, kills: 0, heat: 0, stars: 0, evadeT: 0, bustT: 0,
   cops: [], peds: [], parts: [], upg: {}, P: null,
   interact: null, grace: 0, copSpawnCD: 0, clubSecs: 0, clubDecay: 0,
+  gm: 'story', freeze: false,
   m: null, bonus: {}, flags: {}, selCar: 0, name: 'PLAYER', outFuelWarn: false, nearMiss: 0, speedMax: 0
 };
 var IN = { gas: false, brk: false, nos: false, hnd: false, spr: false, actHeld: false };   // touch buttons
@@ -106,6 +107,7 @@ function setupInput() {
 }
 
 function carInput() {
+  if (G.freeze) return { throttle: 0, brake: 0, steer: 0, analog: false, hand: true, nitro: false };
   var steer = 0, analog = false;
   if (pad.id !== null && Math.abs(pad.x) > 0.001) {
     var s = pad.x, dz = 0.07;
@@ -173,10 +175,11 @@ function resetGame() {
   for (i = 0; i < G.parts.length; i++) W.root.remove(G.parts[i]); G.parts = [];
   if (G.place) leaveInteriorState();
   if (G.carMesh) W.root.remove(G.carMesh);
-  var m = CAR_MODELS[G.selCar];
-  G.carMesh = buildCarMesh({ color: m.color, accent: m.accent, roof: m.roof, stripe: m.stripe });
+  var m = CAR_MODELS[G.selCar], versus = G.gm !== 'story', isCop = versus && typeof mp !== 'undefined' && mp.role === 'cop';
+  G.carMesh = isCop ? buildCarMesh({ police: true, color: 0x15204a, accent: 0x0a0a18, roof: 0x0a0a14 }) : buildCarMesh({ color: m.color, accent: m.accent, roof: m.roof, stripe: m.stripe });
   W.root.add(G.carMesh);
-  G.car = Core.makeCar(4, 4, 0); G.car.fuel = 35; G.car.nitro = 100;
+  G.car = Core.makeCar(4, 4, 0); G.car.fuel = versus ? 100 : 35; G.car.nitro = 100;
+  if (versus && mp.start) { G.car.x = mp.start.x; G.car.z = mp.start.z; G.car.a = mp.start.a; }
   G.upg = {}; applyUpgrades();
   G.mode = 'car'; G.place = null; G.over = false; G.paused = false;
   G.money = 200; G.score = 0; G.kills = 0; G.heat = 0; G.stars = 0; G.evadeT = 0; G.bustT = 0;
@@ -190,8 +193,8 @@ function resetGame() {
   ['gameover', 'winscreen'].forEach(function (id) { $(id).classList.remove('show'); });
   closeOverlays();
   show('toast', false); show('prompt', false);
-  spawnPeds();
-  initMissions();
+  if (!versus) spawnPeds();
+  if (versus) { G.m = { cur: 0, st: {} }; G.flags = {}; G.bonus = {}; G.surv = 0; } else initMissions();
   updateHUD(0.016, true);
   setCarCameraSnap();
   clock.getDelta(); G.running = true;
@@ -222,9 +225,10 @@ var crashHooks = {
 };
 function applyDamage(dmg, impact) {
   if (G.grace > 0 || G.mode !== 'car') return;
+  if (G.gm === 'chase' && mp.role === 'cop') { playBump(Math.min(1, impact / 40)); return; }      // police cars are indestructible
   G.car.health = Math.max(0, G.car.health - dmg);
   playBump(Math.min(1, impact / 40)); cameraShake(0.25, Math.min(0.9, 0.2 + impact / 60));
-  if (G.car.health <= 0) gameOver('WRECKED');
+  if (G.car.health <= 0) { if (G.gm !== 'story') mpWrecked(); else gameOver('WRECKED'); }
 }
 function cameraShake(dur, amt) { G.shakeT = Math.max(G.shakeT, dur); G.shake = Math.max(G.shake, amt); }
 
@@ -371,6 +375,7 @@ function copParams() { var P = Core.defaultParams(); P.top = 34 + G.stars * 5; P
 
 function updateCops(dt) {
   var car = G.car, i, j;
+  if (G.gm !== 'story') return;                       // police are real players in versus modes
   if (G.stars > 0) {
     G.copSpawnCD -= dt;
     if (G.cops.length < G.stars && G.copSpawnCD <= 0) { spawnCop(); G.copSpawnCD = 2.2; }
@@ -441,7 +446,7 @@ function updateCarMode(dt) {
   G.speedMax = Math.max(G.speedMax, sp * Core.KMH);
 
   // fuel (more speed → more fuel)
-  if (sp > 0.5) car.fuel = Math.max(0, car.fuel - (0.05 + sp * 0.0062) * dt);
+  if (sp > 0.5 && G.gm === 'story') car.fuel = Math.max(0, car.fuel - (0.05 + sp * 0.0062) * dt);
   if (car.fuel <= 0 && !G.outFuelWarn) { G.outFuelWarn = true; toast('OUT OF FUEL!  Roll to a stop and call a tow', 3000, '#ff4433'); }
   if (car.fuel > 5) G.outFuelWarn = false;
 
@@ -450,11 +455,13 @@ function updateCarMode(dt) {
     if (G.smokeT <= 0) { G.smokeT = 0.09 + Math.random() * 0.08; spawnSmoke(car.x + Math.sin(car.a) * 3.4, 1.6, car.z + Math.cos(car.a) * 3.4); }
   }
   checkKills();
+  if (G.carMesh.userData.sirenL) { var son = Math.floor(G.t * 6) % 2 === 0; G.carMesh.userData.sirenL.material.color.setHex(son ? 0xff1100 : 0x330000); G.carMesh.userData.sirenR.material.color.setHex(son ? 0x000833 : 0x1122ff); }
   syncCarMesh(G.carMesh, car, dt, W.dayF === undefined ? 0 : 1 - W.dayF);
   computeCarInteract();
 }
 
 function computeCarInteract() {
+  if (G.gm !== 'story') { G.interact = null; return; }
   var car = G.car, kmh = Math.hypot(car.vx, car.vz) * Core.KMH, best = null, k;
   for (k in PLACES) {
     var p = PLACES[k], d = Math.hypot(car.x - p.svc.x, car.z - p.svc.z);
@@ -510,7 +517,8 @@ function actPress() {
 }
 
 function unstuckCar() {
-  if (!G.running || G.mode !== 'car' || G.over) return;
+  if (!G.running || G.mode !== 'car' || G.over || G.freeze) return;
+  if (G.gm === 'race') { mpRespawn(); return; }
   var c = G.car, n = Core.nearestNode(c.x, c.z);
   c.x = Core.ROAD_LINES[n.i]; c.z = Core.ROAD_LINES[n.j];
   c.a = Math.round(c.a / (Math.PI / 2)) * (Math.PI / 2); c.vx = c.vz = c.w = 0;
@@ -572,6 +580,7 @@ function loop() {
         updatePeds(dt);
         updateParticles(dt);
         updateMissions(dt);
+        mpModeUpdate(dt);
         if (typeof mpCollide === 'function') mpCollide(dt);
         updateCarCamera(dt);
         updateSky(G.tod, W.camera.position);
@@ -608,7 +617,7 @@ function updateWorldFx(dt) {
 window.addEventListener('load', function () {
   setupInput();
   buildCarChips();
-  $('btn-solo-play').addEventListener('click', function () { G.name = ($('mp-name').value || 'PLAYER').toUpperCase(); startGame(); });
+  $('btn-solo-play').addEventListener('click', function () { G.gm = 'story'; G.name = ($('mp-name').value || 'PLAYER').toUpperCase(); startGame(); });
   $('btn-retry').addEventListener('click', function () { resetGame(); });
   $('btn-again').addEventListener('click', function () { resetGame(); });
   initHud();

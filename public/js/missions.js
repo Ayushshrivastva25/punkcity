@@ -130,6 +130,7 @@ function startMission() {
 function mEvent(name) { G.flags[name] = true; }
 
 function updateMissions(dt) {
+  if (G.gm !== 'story') return;
   var m = curMission();
   if (m) {
     var fin = false;
@@ -161,11 +162,13 @@ function bonusDone(id) {
 
 // ───────── HUD hooks ─────────
 function currentTarget() {
+  if (G.gm !== 'story') return mpTarget();
   var m = curMission(); if (!m || !m.target || !G.m) return null;
   return m.target(G.m.st) || null;
 }
-function missionTimer() { var m = curMission(); return (m && m.timer) ? m.timer(G.m.st) : null; }
+function missionTimer() { if (G.gm !== 'story') return mpTimer(); var m = curMission(); return (m && m.timer) ? m.timer(G.m.st) : null; }
 function missionHudInfo() {
+  if (G.gm !== 'story') return mpHudInfo();
   var m = curMission();
   if (!m) return { title: 'ALL MISSIONS DONE', sub: '' };
   return { title: (G.m.cur + 1) + '/10 · ' + m.title, sub: (m.sub ? m.sub(G.m.st) : m.brief) };
