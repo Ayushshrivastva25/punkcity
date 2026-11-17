@@ -32,6 +32,19 @@ function cpTarget(st, cps, label) {
 }
 function svcTarget(k, label) { var s = PLACES[k].svc; return { x: s.x, z: s.z, r: s.r, label: label || PLACES[k].name, color: PLACES[k].color }; }
 
+var STORY = {"fuel": ["RAZOR", "Welcome to Punk City, rookie. Your tank's bone dry — hit the gas station before we talk business.", "RAZOR", "Full tank. Now let's see if you've got the nerve for this town."], "rampage": ["RAZOR", "The Vipers run these streets. Make some noise — five pedestrians — so they know we're here.", "RAZOR", "Loud. And now the cops are on you — lose them!"], "heat": ["RAZOR", "Sirens! Break line of sight, or ghost into Club Neon. They never check the dance floor.", "RAZOR", "Clean getaway. Swing by Maya's garage and get that car patched up."], "garage": ["MAYA", "Pull into my bay. First visit's on the house — Razor's tab.", "MAYA", "Good as new. Watch out for Viper's crew — they ram."], "delivery": ["RAZOR", "I need a package moved west to east. Fast. And don't dent it.", "RAZOR", "On time. One of Viper's shipments just went missing, funny that."], "race": ["VIPER", "So you're Razor's new driver. One lap of the loop — beat me, or leave town.", "VIPER", "...Lucky. Don't count on it twice."], "bank": ["RAZOR", "Viper keeps his cash in the First Bank vault. Guard, vault, cash, out. You get 30 seconds once the alarm trips.", "RAZOR", "You got it! Cops are swarming — get to Club Neon and lay low."], "lowlow": ["RAZOR", "Heat's gone. Viper's furious — he wants a rematch on the Ring Road.", "MAYA", "Hear that? Hit the Tune Shop first. You'll need every horsepower."], "tune": ["MAYA", "Spend that cash at the Tune Shop — nitro, engine, armor. Your pick.", "MAYA", "Now she's a monster. Viper's waiting on the Ring Road."], "ring": ["VIPER", "One lap of the Ring Road. Winner owns Punk City. Don't blink.", "VIPER", "...You win. The city's yours. Don't let it go to your head."]};
+// Checkpoint run against VIPER: the rival appears when you cross the start line.
+function rivalRun(st, dt, cps, limit, R, what, rivalTop) {
+  if (st.stage === 1 && !G.rival) { spawnRival(cps, rivalTop); comm('VIPER', st.said ? 'Again? Fine.' : 'Eat my dust!', 2200); st.said = true; }
+  var done = runCheckpoints(st, cps, limit, R, dt, what);
+  if (done) { removeRival(); return true; }
+  if (st.stage === 0 && G.rival) removeRival();
+  if (G.rival && G.rival.finished) {
+    st.stage = 0; st.idx = 0; removeRival();
+    toast('VIPER BEAT YOU — drive back to the start', 3000, '#cc66ff'); comm('VIPER', 'Too slow, rookie. Try again.', 3000);
+  }
+  return false;
+}
 var MAIN = [
   { id: 'fuel', title: 'FILL THE TANK', reward: 100,
     brief: 'Your tank is almost empty. Drive to the GAS STATION, stop on the glowing ring and press the action button.',
@@ -77,7 +90,7 @@ var MAIN = [
     target: function (st) { return cpTarget(st, RACE_CPS, 'RACE'); },
     sub: function (st) { return st.stage === 0 ? 'Drive to the green START marker' : 'Checkpoint ' + Math.min(st.idx, 4) + ' / 4'; },
     timer: function (st) { return st.stage === 1 ? st.t : null; },
-    update: function (st, dt) { return runCheckpoints(st, RACE_CPS, 60, 14, dt, 'RACE'); },
+    update: function (st, dt) { return rivalRun(st, dt, RACE_CPS, 60, 14, 'RACE', 52); },
     done: function () { return false; } },
 
   { id: 'bank', title: 'THE BIG SCORE', reward: 0,
@@ -104,7 +117,7 @@ var MAIN = [
     target: function (st) { return cpTarget(st, RING_CPS, 'RING'); },
     sub: function (st) { return st.stage === 0 ? 'Drive to the start marker on the north road' : 'Checkpoint ' + Math.min(st.idx, 8) + ' / 8'; },
     timer: function (st) { return st.stage === 1 ? st.t : null; },
-    update: function (st, dt) { return runCheckpoints(st, RING_CPS, 90, 18, dt, 'RING LAP'); },
+    update: function (st, dt) { return rivalRun(st, dt, RING_CPS, 90, 18, 'RING LAP', 54); },
     done: function () { return false; } }
 ];
 
@@ -126,6 +139,7 @@ function startMission() {
   G.m.st = {};
   if (m.start) m.start(G.m.st);
   toast('MISSION ' + (G.m.cur + 1) + '/10: ' + m.title, 2800, '#ffcc00');
+  var sl = STORY[m.id]; if (sl) setTimeout(function () { if (G.m && curMission() === m) comm(sl[0], sl[1]); }, 1200);
 }
 function mEvent(name) { G.flags[name] = true; }
 
@@ -138,6 +152,11 @@ function updateMissions(dt) {
     if (!fin && m.done) fin = m.done(G.m.st);
     if (fin) completeMission(m);
   }
+  // reactive one-liners (each once)
+  G.said = G.said || {};
+  if (!G.said.low && G.car.fuel < 20 && G.car.fuel > 0) { G.said.low = true; comm('RAZOR', "Fuel's getting low. Gas station's marked on your map.", 3000); }
+  if (!G.said.hurt && G.car.health < 40) { G.said.hurt = true; comm('MAYA', "That car's smoking! Bring it to the garage.", 3000); }
+  if (!G.said.cops && G.stars > 0 && curMission() && curMission().id !== 'heat' && curMission().id !== 'rampage') { G.said.cops = true; comm('RAZOR', "Cops! Keep moving, break their line of sight.", 3000); }
   // bonus challenges
   if (!G.bonus.rampage25 && G.kills >= 25) bonusDone('rampage25');
   if (!G.bonus.speed150 && Math.hypot(G.car.vx, G.car.vz) * Core.KMH >= 150) bonusDone('speed150');
@@ -148,6 +167,7 @@ function completeMission(m) {
   playCoin();
   var n = G.m.cur + 1;
   triggerDrama('MISSION COMPLETE', m.title, m.reward ? '+$' + m.reward : '', '#0ffcd4');
+  var so = STORY[m.id]; if (so) comm(so[2], so[3]);
   if (typeof mpMissionDone === 'function') mpMissionDone(m.id, n);
   G.m.cur++;
   if (G.m.cur >= MAIN.length) { setTimeout(triggerWin, 1800); G.m.st = {}; return; }

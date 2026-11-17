@@ -16,6 +16,10 @@ Multiplayer open-city driving game (Three.js + Node/Socket.IO). `npm install && 
 * Inside the bank / club / tune shop the city is hidden and frozen — nothing can hit you, the camera stays in the room.
 * 10 story missions (fuel → rampage → shake the cops → garage → delivery → street race → bank heist → lay low → upgrade → ring-road lap) + 4 bonus challenges. First to finish all 10 wins in multiplayer.
 
+## Story
+Three characters talk to you through a comm box at the top of the screen: **Razor** (your fixer, phone), **Maya** (mechanic at the garage) and rival gang boss **Viper**. Every mission has an intro and outro line, plus one-off reactive lines (low fuel, car smoking, cops on your tail).
+Viper races you in two missions — the street race (mission 6) and the final Ring Road lap (mission 10). He appears when you cross the start line; if he finishes first the run resets and you try again. He also rams, so watch your health. His driver AI is `Core.driveRoute` (unit-tested to lap both courses without hard crashes).
+
 ## Multiplayer modes (pick when you create a room, up to 3 players)
 * **Story Race** — first to finish all 10 missions.
 * **Street Race** — 3-2-1 countdown, 2 laps of an 8-checkpoint loop, live positions, podium. The server accepts checkpoints only in order and only if you were actually near them. Wreck out and you respawn at your last checkpoint (R does the same).

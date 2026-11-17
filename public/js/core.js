@@ -414,6 +414,23 @@ Core.driveToward = function (car, tx, tz, topSpeed, brain, dt) {
   return inp;
 };
 
+
+// ── ROUTE DRIVER (rival racer) ───────────────────
+// rt = { cps:[{x,z}…], idx:1, finished:false, brain:{} }.  Slows early for sharp corners and
+// switches to the next checkpoint late (so it takes the corner instead of cutting it).
+Core.driveRoute = function (car, rt, top, dt) {
+  var cps = rt.cps;
+  if (rt.finished) return { throttle: 0, brake: 1, steer: 0, hand: false, nitro: false };
+  var cp = cps[rt.idx], prev = cps[rt.idx - 1] || { x: car.x, z: car.z }, nxt = cps[rt.idx + 1];
+  var d = Math.hypot(cp.x - car.x, cp.z - car.z), turn = 0;
+  if (nxt) turn = Math.abs(angDiff(Math.atan2(cp.x - prev.x, cp.z - prev.z), Math.atan2(nxt.x - cp.x, nxt.z - cp.z)));
+  var reach = turn > 0.5 ? 6 : 18;
+  if (d < reach) { rt.idx++; if (rt.idx >= cps.length) { rt.finished = true; return { throttle: 0, brake: 1, steer: 0, hand: false, nitro: false }; } return Core.driveRoute(car, rt, top, dt); }
+  var cap = top;
+  if (turn > 0.5) cap = Math.min(top, 14 + clamp(d / 70, 0, 1) * (top - 14));
+  return Core.driveToward(car, cp.x, cp.z, cap, rt.brain, dt);
+};
+
 root.Core = Core;
 if (typeof module !== 'undefined' && module.exports) module.exports = Core;
 })(typeof window !== 'undefined' ? window : globalThis);

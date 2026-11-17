@@ -81,7 +81,7 @@ body.desktop.playing #hints{display:block}
 body.desktop #speedo{left:auto;right:calc(var(--sr) + var(--pad));transform:none}
 
 /* toast + drama */
-#toast{position:absolute;top:22%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.82);border:2px solid #ffcc00;color:#ffcc00;font-size:calc(var(--fs)*1.15);letter-spacing:.14em;padding:.7em 1.4em;display:none;text-align:center;max-width:80vw;pointer-events:none;border-radius:6px}
+#toast{position:absolute;top:34%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.82);border:2px solid #ffcc00;color:#ffcc00;font-size:calc(var(--fs)*1.15);letter-spacing:.14em;padding:.7em 1.4em;display:none;text-align:center;max-width:80vw;pointer-events:none;border-radius:6px}
 #drama{position:fixed;inset:0;z-index:45;pointer-events:none;display:none;flex-direction:column;align-items:center;justify-content:center}
 #drama-flash{position:absolute;inset:0;opacity:0;transition:opacity .08s}
 #drama-title{font-size:calc(var(--fs)*3.2);font-weight:900;letter-spacing:.14em;color:#fff;text-shadow:0 0 30px currentColor;opacity:0;transform:scale(1.4);transition:all .15s;text-align:center}
@@ -147,6 +147,12 @@ body.desktop #speedo{left:auto;right:calc(var(--sr) + var(--pad));transform:none
 #mp-winner{z-index:55}
 #mp-winner h2{font-size:calc(var(--fs)*4);font-weight:900;letter-spacing:.2em;color:#ffcc00}
 .other-label{position:fixed;z-index:9;transform:translate(-50%,-100%);font-size:calc(var(--fs)*.85);font-weight:700;letter-spacing:.1em;padding:.15em .6em;background:rgba(0,0,0,.6);border:1px solid;border-radius:4px;pointer-events:none;display:none;white-space:nowrap}
+#comm{position:absolute;top:calc(var(--st) + var(--pad) + var(--u)*11.5);left:50%;transform:translateX(-50%) translateY(-8px);width:min(46vw,calc(var(--u)*56));display:none;align-items:center;gap:.8em;padding:.6em .9em;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;background:rgba(5,8,18,.88);border-width:1.5px}
+#comm.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#comm-av{font-size:calc(var(--fs)*2.6);line-height:1;flex-shrink:0}
+#comm-name{font-weight:900;letter-spacing:.2em;font-size:.82em}
+#comm-txt{color:#fff;font-size:.9em;letter-spacing:.03em;line-height:1.4;margin-top:.2em}
+#win-epi{max-width:min(80vw,calc(var(--u)*70));color:#ddd;font-size:var(--fs);letter-spacing:.06em;line-height:1.7;margin-top:.5em}
 #countdown{position:fixed;left:0;right:0;top:34%;text-align:center;z-index:46;pointer-events:none;font-weight:900;font-size:calc(var(--fs)*7);color:#fff;text-shadow:0 0 30px #0ffcd4,0 0 6px #000;letter-spacing:.1em;display:none}
 body.gm-race #wanted,body.gm-chase #wanted{display:none}
 body.gm-race #money,body.gm-chase #money{display:none}
@@ -254,6 +260,7 @@ body.foot #t-act{right:calc(var(--sr) + var(--pad)*1.5 + var(--btn)*.1);bottom:c
     <div><b style="color:#fff">ON FOOT</b> WASD move · drag mouse = camera · SHIFT run</div>
     <div><b style="color:#fff">E</b> interact &nbsp; <b style="color:#fff">M</b> map &nbsp; <b style="color:#fff">J</b> missions &nbsp; <b style="color:#fff">R</b> unstuck &nbsp; <b style="color:#fff">P</b> pause</div>
   </div>
+  <div class="pn" id="comm"><div id="comm-av">📞</div><div><div id="comm-name"></div><div id="comm-txt"></div></div></div>
   <div id="toast"></div>
 </div>
 
@@ -298,7 +305,8 @@ body.foot #t-act{right:calc(var(--sr) + var(--pad)*1.5 + var(--btn)*.1);bottom:c
   <button class="btn btn-red" id="btn-retry">TRY AGAIN</button>
 </div>
 <div class="screen" id="winscreen">
-  <h2>YOU WIN</h2>
+  <h2>THE CITY IS YOURS</h2>
+  <div id="win-epi"></div>
   <div class="gs">SCORE <span id="winscore">0</span> &nbsp;|&nbsp; MONEY $<span id="winmoney">0</span></div>
   <button class="btn btn-cyan" id="btn-again">PLAY AGAIN</button>
 </div>

@@ -131,5 +131,20 @@ console.log('8) On-foot circle collision & camera arm');
   ok(5 + 15 * tr <= 12.3 + 1e-6, 'camera stays inside room (z=' + (5 + 15 * tr).toFixed(2) + ')');
 }
 
+console.log('9) Rival AI laps (real city colliders)');
+{
+  const RACE = [{ x: -210, z: -210 }, { x: 210, z: -210 }, { x: 210, z: 210 }, { x: -210, z: 210 }, { x: -210, z: -210 }];
+  const RING = [{ x: 0, z: -330 }, { x: 330, z: -330 }, { x: 330, z: 0 }, { x: 330, z: 330 }, { x: 0, z: 330 }, { x: -330, z: 330 }, { x: -330, z: 0 }, { x: -330, z: -330 }, { x: 0, z: -330 }];
+  for (const [name, cps, top, limit] of [['race loop', RACE, 52, 60], ['ring road', RING, 54, 90]]) {
+    const p0 = cps[0], a = Math.atan2(cps[1].x - p0.x, cps[1].z - p0.z);
+    const car = Core.makeCar(p0.x, p0.z, a), rt = { cps, idx: 1, finished: false, brain: {} };
+    const RP = Core.defaultParams(); RP.top = top; RP.acc = 22; RP.nitroTopMul = 1;
+    let t = 0, hits = 0, big = 0; const hooks = { onImpact: (i) => { hits++; if (i * 2 > 30) big++; } };
+    while (t < 140 && !rt.finished) { Core.stepCar(car, Core.driveRoute(car, rt, top, 1 / 60), RP, 1 / 60, cols, hooks); t += 1 / 60; }
+    console.log('     ' + name + ': finished=' + rt.finished + ' time=' + t.toFixed(1) + 's wallHits=' + hits + ' hardHits(>30km/h)=' + big);
+    ok(rt.finished && t < limit && big === 0, name + ' completed in under ' + limit + 's with no hard crashes');
+  }
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nALL PASSED');
 process.exit(fails ? 1 : 0);

@@ -171,7 +171,7 @@ function startGame() {
 function resetGame() {
   var i;
   for (i = 0; i < G.peds.length; i++) W.root.remove(G.peds[i].mesh); G.peds = [];
-  removeCops(); stopSiren(); stopClubMusic();
+  removeCops(); removeRival(); stopSiren(); stopClubMusic(); commClear(); G.said = {};
   for (i = 0; i < G.parts.length; i++) W.root.remove(G.parts[i]); G.parts = [];
   if (G.place) leaveInteriorState();
   if (G.carMesh) W.root.remove(G.carMesh);
@@ -435,6 +435,31 @@ function bust() {
   playTone(220, 0.25, 'sawtooth', 0.06);
 }
 
+// ═══════════ RIVAL (VIPER) ═══════════
+function spawnRival(cps, top) {
+  removeRival();
+  var p = cps[0], n = cps[1], a = Math.atan2(n.x - p.x, n.z - p.z);
+  var car = Core.makeCar(p.x + Math.cos(a) * 5, p.z - Math.sin(a) * 5, a);
+  var mesh = buildCarMesh({ color: 0x6a1bb0, accent: 0x15002a, roof: 0x0a0014, stripe: true });
+  var lab = makeLabel('VIPER', '#cc66ff', 14, 4.4); lab.position.set(0, 7, 0); mesh.add(lab);
+  W.root.add(mesh);
+  G.rival = { car: car, mesh: mesh, rt: { cps: cps, idx: 1, finished: false, brain: {} }, top: top, hitCD: 0, finished: false };
+}
+function removeRival() { if (G.rival) { W.root.remove(G.rival.mesh); G.rival = null; } }
+function updateRival(dt) {
+  var r = G.rival; if (!r) return;
+  var P = Core.defaultParams(); P.top = r.top; P.acc = 22; P.nitroTopMul = 1;
+  var inp = Core.driveRoute(r.car, r.rt, r.top, dt);
+  Core.stepCar(r.car, inp, P, dt, W.cols, null);
+  r.finished = r.rt.finished;
+  if (G.grace <= 0) {
+    var rel = Core.collideCars(G.car, r.car, 1, 1.1);
+    r.hitCD = Math.max(0, r.hitCD - dt);
+    if (rel > 0 && r.hitCD <= 0) { r.hitCD = 0.3; var dmg = Core.crashDamage(rel, G.P.armor) * 0.8; if (dmg > 0) applyDamage(dmg, rel); else if (rel > 3) playBump(0.25); }
+  }
+  syncCarMesh(r.mesh, r.car, dt, W.dayF === undefined ? 0 : 1 - W.dayF);
+}
+
 // ═══════════ CAR MODE ═══════════
 function updateCarMode(dt) {
   var car = G.car, inp = carInput();
@@ -560,6 +585,7 @@ function triggerWin() {
   if (G.over) return;
   G.over = true; G.running = false; stopSiren(); updateEngineSound(0, 0, false);
   setT('winscore', G.score); setT('winmoney', G.money);
+  $('win-epi').textContent = 'Viper is out of the picture, his cash is yours, and the whole city knows your name. Razor sends one last message: "Not bad for a rookie. Keep the engine running — there are always more streets to burn."';
   $('winscreen').classList.add('show');
   playTone(660, 0.14, 'square', 0.05); setTimeout(function () { playTone(880, 0.18, 'sine', 0.05); }, 150);
 }
@@ -580,6 +606,7 @@ function loop() {
         updatePeds(dt);
         updateParticles(dt);
         updateMissions(dt);
+        updateRival(dt);
         mpModeUpdate(dt);
         if (typeof mpCollide === 'function') mpCollide(dt);
         updateCarCamera(dt);

@@ -61,7 +61,7 @@ const dir = path.join(__dirname, '../public/js');
   catch (e) { errors.push('LOAD ' + f + ': ' + e.stack.split('\n').slice(0, 3).join(' | ')); }
 });
 const run = (code, label) => { try { return vm.runInContext(code, sandbox); } catch (e) { errors.push(label + ': ' + e.stack.split('\n').slice(0, 4).join(' | ')); } };
-const frames = (n, label, pre) => { for (let i = 0; i < n; i++) { try { if (pre) vm.runInContext(pre, sandbox); vm.runInContext('(function(){var dt=0.016; if(G.running&&!G.paused){G.t+=dt; if(G.mode==="car"){G.tod=(G.tod+dt*0.08)%24;updateCarMode(dt);updateCops(dt);updatePeds(dt);updateParticles(dt);updateMissions(dt);mpModeUpdate(dt);updateCarCamera(dt);updateSky(G.tod,W.camera.position);updateWorldFx(dt);}else{updateFoot(dt);} updateHUD(dt);} })()', sandbox); } catch (e) { errors.push(label + ' frame ' + i + ': ' + e.stack.split('\n').slice(0, 5).join(' | ')); return; } } };
+const frames = (n, label, pre) => { for (let i = 0; i < n; i++) { try { if (pre) vm.runInContext(pre, sandbox); vm.runInContext('(function(){var dt=0.016; if(G.running&&!G.paused){G.t+=dt; if(G.mode==="car"){G.tod=(G.tod+dt*0.08)%24;updateCarMode(dt);updateCops(dt);updatePeds(dt);updateParticles(dt);updateMissions(dt);updateRival(dt);mpModeUpdate(dt);updateCarCamera(dt);updateSky(G.tod,W.camera.position);updateWorldFx(dt);}else{updateFoot(dt);} updateHUD(dt);} })()', sandbox); } catch (e) { errors.push(label + ' frame ' + i + ': ' + e.stack.split('\n').slice(0, 5).join(' | ')); return; } } };
 
 run('window.addEventListener=function(){}; setupInput(); buildCarChips(); initHud();', 'setup');
 run('startGame()', 'startGame');
@@ -140,6 +140,21 @@ run('mpOnCountdown(0)', 'go'); run('mpRemoteUpdate("b",{x:4,z:4,angle:0,vx:0,vz:
 frames(60, 'cop'); console.log('cop: police mesh', run('!!G.carMesh.userData.sirenL'), 'target', run('JSON.stringify(mpTarget())'));
 run('G.car.health=100;G.grace=0;applyDamage(30,45)', 'cop dmg'); console.log('  cop health after big hit (invulnerable)', run('G.car.health'));
 run('G.gm="story";mp.active=false;mp.mode="story";document.body.classList.remove("gm-chase")', 'back');
+
+// ───────── story: rival race ─────────
+console.log('\n[story / rival]');
+run('G.gm="story"; mp.active=false; resetGame();', 'fresh story game');
+run('G.m.cur=5; startMission(); G.car.health=100; G.grace=0;', 'jump to race mission');
+console.log('mission', run('MAIN[G.m.cur].id'), 'lines for it:', run('STORY.race[0]'));
+run('G.car.x=-210;G.car.z=-210;G.car.vx=0;G.car.vz=0;G.car.a=Math.PI/2', 'to start'); frames(5, 'start');
+console.log('stage', run('G.m.st.stage'), 'rival spawned', run('!!G.rival'), 'rival at', run('G.rival&&Math.round(G.rival.car.x)+","+Math.round(G.rival.car.z)'));
+frames(60*30, 'rival drives', 'G.car.x=0;G.car.z=0;G.car.vx=0;G.car.vz=0;G.car.health=100;G.stars=0;');
+console.log('after 30s idle player: rival idx', run('G.rival?G.rival.rt.idx:"removed"'), 'at', run('G.rival?Math.round(G.rival.car.x)+","+Math.round(G.rival.car.z):"-"'));
+frames(60*20, 'rival finishes', 'G.car.x=0;G.car.z=0;G.car.vx=0;G.car.vz=0;G.car.health=100;G.stars=0;');
+console.log('after rival finished: stage', run('G.m.st.stage'), 'rival', run('G.rival?"present":"removed"'), 'still mission', run('MAIN[G.m.cur].id'));
+run('G.m.cur=9; startMission();', 'ring'); run('G.car.x=0;G.car.z=-330;G.car.vx=0;G.car.vz=0', 'ring start'); frames(5, 'ringstart');
+console.log('ring: rival', run('!!G.rival'), 'target', run('JSON.stringify(currentTarget())'));
+run('removeRival(); resetGame();', 'cleanup');
 
 console.log(errors.length ? '\nERRORS:\n' + errors.join('\n') : '\nNO RUNTIME ERRORS');
 process.exit(errors.length ? 1 : 0);

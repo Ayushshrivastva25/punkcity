@@ -173,6 +173,7 @@ function renderMap(ctx, S, cx, cz, scale, a, full) {
     ctx.beginPath(); ctx.moveTo(tp[0], tp[1] - r); ctx.lineTo(tp[0] + r, tp[1]); ctx.lineTo(tp[0], tp[1] + r); ctx.lineTo(tp[0] - r, tp[1]); ctx.closePath(); ctx.fill(); ctx.stroke();
     if (full) { ctx.font = 'bold ' + (S * 0.019) + 'px Orbitron, sans-serif'; ctx.fillStyle = '#ffcc00'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(tg.label || 'OBJECTIVE', tp[0], tp[1] + r + 3); }
   }
+  if (G.rival) { var rp = P(G.rival.car.x, G.rival.car.z); ctx.fillStyle = '#cc66ff'; ctx.beginPath(); ctx.arc(rp[0], rp[1], full ? S * 0.011 : S * 0.03, 0, Math.PI * 2); ctx.fill(); }
   // police
   ctx.fillStyle = '#3355ff';
   G.cops.forEach(function (c) { var cp = P(c.car.x, c.car.z); ctx.beginPath(); ctx.arc(cp[0], cp[1], full ? S * 0.008 : S * 0.022, 0, Math.PI * 2); ctx.fill(); });
@@ -226,3 +227,27 @@ function buildMissionPanel() {
   });
   $('ms-box').innerHTML = h;
 }
+
+// ───────── COMMS: story dialogue (phone calls / radio) ─────────
+var CAST = {
+  RAZOR: { av: '📞', css: '#0ffcd4' },
+  MAYA:  { av: '🔧', css: '#00d8ff' },
+  VIPER: { av: '🐍', css: '#cc66ff' }
+};
+var commQ = [], commBusy = false;
+function comm(who, text, ms) {
+  commQ.push({ who: who, text: text, ms: ms || Math.max(3200, 1400 + text.length * 55) });
+  if (!commBusy) commNext();
+}
+function commNext() {
+  var el = $('comm');
+  if (!commQ.length) { commBusy = false; el.classList.remove('show'); setTimeout(function () { if (!commBusy) el.style.display = 'none'; }, 280); return; }
+  commBusy = true;
+  var c = commQ.shift(), cast = CAST[c.who] || CAST.RAZOR;
+  el.style.display = 'flex'; el.style.borderColor = cast.css;
+  $('comm-av').textContent = cast.av; var n = $('comm-name'); n.textContent = c.who; n.style.color = cast.css; $('comm-txt').textContent = c.text;
+  setTimeout(function () { el.classList.add('show'); }, 20);
+  playTone(cast.css === '#cc66ff' ? 330 : 720, 0.08, 'sine', 0.04);
+  setTimeout(commNext, c.ms);
+}
+function commClear() { commQ = []; commBusy = false; var el = $('comm'); if (el) { el.classList.remove('show'); el.style.display = 'none'; } }
